@@ -18,9 +18,13 @@ public class FileParser implements Runnable {
             .compile("^\\s*(?:public\\s+)?interface\\s+([a-zA-Z_][a-zA-Z0-9_]*)", Pattern.MULTILINE);
     private static final Pattern ABSTRACT_CLASS_PATTERN = Pattern
             .compile("^\\s*(?:public\\s+)?abstract\\s+class\\s+([a-zA-Z_][a-zA-Z0-9_]*)", Pattern.MULTILINE);
-   
-            private static final Pattern ATTRIBUTE_PATTERN = Pattern
-            .compile("^\\s*(?:(public|protected|private|static|final)\\s*)*(\\w+)\\s+(\\w+)\\s*(=.*)?;$");
+
+    private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(
+            "^\\s*(public|private|protected)?\\s*" +
+                    "(static\\s+)?(final\\s+)?" +
+                    "([\\w<>\\[\\]]+)\\s+" +
+                    "([a-zA-Z_][a-zA-Z0-9_]*)" +
+                    "\\s*(=.*)?;");
 
     public FileParser(String filePath, UMLModel umlModel) {
         this.filePath = filePath;
@@ -59,20 +63,37 @@ public class FileParser implements Runnable {
     private void parseAttributeInfo(String line) {
         Matcher attributeMatcher = ATTRIBUTE_PATTERN.matcher(line);
         if (attributeMatcher.find()) {
+            System.out.println("Full Line: " + attributeMatcher.group(0));
             // Get the groups for visibility, return type, attribute name, and assignment
-            String visibility = attributeMatcher.group(1); 
-            String returnType = attributeMatcher.group(2); 
-            String attributeName = attributeMatcher.group(3); 
-            String assignment = attributeMatcher.group(4); 
-    
+            String visibility = attributeMatcher.group(1); // will always stay the same
+
+            // Can add a ternary to switch the groups
+            Boolean isStatic = (attributeMatcher.group(2) == "static") ? true : null;
+            Boolean isFinal = (attributeMatcher.group(3) == "final") ? true : null;
+            String returnType = attributeMatcher.group(4);
+            String attributeName = attributeMatcher.group(5);
+            String attributeAssignment = attributeMatcher.group(6);
+
+            // return type can be in group 2,
+            // String returnType = (group2 != "static") ? group2 :
             // Check if visibility is null, then assign package-private
             if (visibility == null) {
-                visibility = "package-private"; 
+                visibility = "package-private";
             }
-    
-           
+
+            umlModel.addAttribute(this.className, attributeName);
+            umlModel.addAttributeVisibility(attributeName, visibility);
+            umlModel.addAttributeStatic(this.className, attributeName, isStatic);
+            umlModel.addAttributeFinal(this.className, attributeName, isFinal);
+            umlModel.addAttributeReturnType(this.className, attributeName, returnType);
+            umlModel.addAttributeAssignment(this.className, attributeName, attributeAssignment);
+
+
+            
+
         }
     }
+
     @Override
     public void run() {
 
@@ -81,9 +102,10 @@ public class FileParser implements Runnable {
             // System.out.println(lines);
             for (String line : lines) {
                 parseClassInterfaceAbstractName(line);
-                // parseAttributeInfo(line);
+                parseAttributeInfo(line);
             }
-
+            
+            System.out.println(umlModel.toString());
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }
@@ -94,6 +116,8 @@ public class FileParser implements Runnable {
         FileParser parser = new FileParser("src//TestFIle.java", model);
         Thread thread = new Thread(parser);
         thread.start();
+        System.out.println(model.toString());
+
     }
 
 }
