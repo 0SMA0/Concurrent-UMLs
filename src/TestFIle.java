@@ -5,4 +5,32 @@ public class TestFIle {
     static String name = "A"; // Static + Type + Name
     final double y = 1; // Final + Type + Name
     public static final String s = "s";
+
+
+    public TestFIle(int z){
+        this.z = z;
+    }
+
+    public int getZ() {
+        return z;
+    }
+    public String getE() {
+        return e;
+    }
+    public int getX() {
+        return x;
+    }
+    public static String getName() {
+        return name;
+    }
+    public double getY() {
+        return y;
+    }
+    public static String getS() {
+        return s;
+    }
+
+
+    
+
 }

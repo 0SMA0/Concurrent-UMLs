@@ -26,6 +26,9 @@ public class FileParser implements Runnable {
                     "([a-zA-Z_][a-zA-Z0-9_]*)" +
                     "\\s*(=.*)?;");
 
+    private static final Pattern METHOD_PATTERN = Pattern.compile(
+            "^\\s*(public|private|protected)?\\s*(static)?\\s*(final)?\\s*([\\w<>\\[\\]]+)\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*(throws\\s+[\\w<>, ]+)?\\s*\\{?");
+
     public FileParser(String filePath, UMLModel umlModel) {
         this.filePath = filePath;
         this.umlModel = umlModel;
@@ -48,7 +51,6 @@ public class FileParser implements Runnable {
             String className = classMatcher.group(1);
             setClassName(className);
             umlModel.addClass(className);
-            System.out.println("Class Name: " + this.className);
         } else if (interfaceMatcher.find()) {
             String interfaceName = interfaceMatcher.group(1);
             setClassName(interfaceName);
@@ -63,7 +65,6 @@ public class FileParser implements Runnable {
     private void parseAttributeInfo(String line) {
         Matcher attributeMatcher = ATTRIBUTE_PATTERN.matcher(line);
         if (attributeMatcher.find()) {
-            System.out.println("Full Line: " + attributeMatcher.group(0));
             // Get the groups for visibility, return type, attribute name, and assignment
             String visibility = attributeMatcher.group(1); // will always stay the same
 
@@ -88,10 +89,17 @@ public class FileParser implements Runnable {
             umlModel.addAttributeReturnType(this.className, attributeName, returnType);
             umlModel.addAttributeAssignment(this.className, attributeName, attributeAssignment);
 
-
-            
-
         }
+    }
+
+    private void parseMethods(String line) {
+        Matcher methodMatcher = METHOD_PATTERN.matcher(line);
+
+        if(methodMatcher.find()) {
+            
+            System.out.println(methodMatcher.group(0));
+        }
+
     }
 
     @Override
@@ -103,9 +111,10 @@ public class FileParser implements Runnable {
             for (String line : lines) {
                 parseClassInterfaceAbstractName(line);
                 parseAttributeInfo(line);
+                parseMethods(line);
             }
-            
-            System.out.println(umlModel.toString());
+
+            // System.out.println(umlModel.toString());
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }
@@ -116,8 +125,6 @@ public class FileParser implements Runnable {
         FileParser parser = new FileParser("src//TestFIle.java", model);
         Thread thread = new Thread(parser);
         thread.start();
-        System.out.println(model.toString());
-
     }
 
 }

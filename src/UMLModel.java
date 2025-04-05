@@ -208,14 +208,18 @@ public class UMLModel {
         }
     }
 
+    
+
     @Override
     public String toString() {
         String s = "UML MODEL: ";
         // do a switch case for when it is a class, interface, 
         
         s += "\nClass Name: " + this.classNames + '\n';
+        s += "Attribute Visibility: " + this.attributeVisibility + "\n";
         s += "Attributes: " + this.classAttributes.values() + "\n";
         s += "Attribute Return types: " + this.attributeReturnTypes.values();
+
         return s;
     }
 
