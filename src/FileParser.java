@@ -75,8 +75,6 @@ public class FileParser implements Runnable {
             String attributeName = attributeMatcher.group(5);
             String attributeAssignment = attributeMatcher.group(6);
 
-            // return type can be in group 2,
-            // String returnType = (group2 != "static") ? group2 :
             // Check if visibility is null, then assign package-private
             if (visibility == null) {
                 visibility = "package-private";
@@ -95,9 +93,26 @@ public class FileParser implements Runnable {
     private void parseMethods(String line) {
         Matcher methodMatcher = METHOD_PATTERN.matcher(line);
 
-        if(methodMatcher.find()) {
-            
-            System.out.println(methodMatcher.group(0));
+        // need to develop a pattern for constructor
+
+        if (methodMatcher.find()) {
+            String visibility = methodMatcher.group(1);
+            Boolean isStatic = (methodMatcher.group(2) == "static") ? true : null;
+            Boolean isFinal = (methodMatcher.group(3) == "final") ? true : null;
+            String returnType = methodMatcher.group(4);
+            String methodName = methodMatcher.group(5);
+            String params = methodMatcher.group(6);
+
+            if ((visibility == null) && (isStatic == null) && (isFinal == null)) {
+                // group 4 becomes the visibility
+                visibility = methodMatcher.group(4);
+                methodName = methodMatcher.group(5);
+                params = methodMatcher.group(6);
+                // group 5 becomes the name
+                // group 6 becomes the params
+            } else if (visibility == null) {
+                visibility = "package-private";
+            }
         }
 
     }

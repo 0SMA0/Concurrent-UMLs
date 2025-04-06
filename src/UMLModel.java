@@ -22,6 +22,10 @@ public class UMLModel {
     private final Map<String, List<String>> classAttributes = new HashMap<>();
     private final Map<String, List<String>> classMethods = new HashMap<>();
 
+    // Keep track of method params
+    // Key 1: class name, Key 2: method name, Value: params
+    private final Map<String, Map<String, String>> methodParams = new HashMap<>();
+
     // Return Types:
     // Key 1: class name, Key 2: method name, Value: return type
     private final Map<String, Map<String, String>> attributeReturnTypes = new HashMap<>();
@@ -64,7 +68,7 @@ public class UMLModel {
             classNames.add(className);
             classMethods.putIfAbsent(className, new ArrayList<>());
             classAttributes.putIfAbsent(className, new ArrayList<>());
-            System.out.println("Added to UML Class: CLASS NAME");
+            System.out.println("\n Added to UML Class: CLASS NAME");
         } finally {
             lock.unlock();
         }
