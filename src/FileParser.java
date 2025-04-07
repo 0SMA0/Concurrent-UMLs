@@ -27,8 +27,8 @@ public class FileParser implements Runnable {
                     "\\s*(=.*)?;");
 
     private static final Pattern METHOD_PATTERN = Pattern.compile(
-            "^\\s*(public|private|protected)?\\s*(static)?\\s*(final)?\\s*([\\w<>\\[\\]]+)\\s+(\\w+)\\s*\\(([^)]*)\\)\\s*(throws\\s+[\\w<>, ]+)?\\s*\\{?");
-
+        "^\\s*(public|protected|private)?\\s*(static)?\\s*(final)?\\s*(?:([\\w<>\\[\\]]+)\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*\\{?"
+        );
     public FileParser(String filePath, UMLModel umlModel) {
         this.filePath = filePath;
         this.umlModel = umlModel;
@@ -92,38 +92,36 @@ public class FileParser implements Runnable {
 
     private void parseMethods(String line) {
         Matcher methodMatcher = METHOD_PATTERN.matcher(line);
-
-        // need to develop a pattern for constructor
-
+    
         if (methodMatcher.find()) {
             String visibility = methodMatcher.group(1);
-            Boolean isStatic = (methodMatcher.group(2) == "static") ? true : null;
-            Boolean isFinal = (methodMatcher.group(3) == "final") ? true : null;
+            Boolean isStatic = "static".equals(methodMatcher.group(2)) ? true : null;
+            Boolean isFinal = "final".equals(methodMatcher.group(3)) ? true : null;
             String returnType = methodMatcher.group(4);
             String methodName = methodMatcher.group(5);
             String params = methodMatcher.group(6);
-
-            
+    
+            // If there is no visibility modifier (e.g., package-private)
+            if (visibility == null) {
+                visibility = "package-private";
+            }
+    
             // Taking into account for the constructor
-            if ((visibility == null) && (isStatic == null) && (isFinal == null)) {
-                visibility = methodMatcher.group(4);
-                methodName = methodMatcher.group(5);
-                params = methodMatcher.group(6);
+            if (returnType == null || methodName.equals(this.className)) {
+                // Constructor
                 umlModel.addMethod(this.className, methodName);
                 umlModel.addMethodVisibility(methodName, visibility);
                 umlModel.addMethodParams(this.className, methodName, params);
             } else {
+                // Regular method
                 umlModel.addMethodVisibility(methodName, visibility);
                 umlModel.addMethod(this.className, methodName);
                 umlModel.addMethodReturnType(this.className, methodName, returnType);
-                umlModel.addMethodStatic(this.className, methodName, isStatic);
-                umlModel.addMethodFinal(this.className, methodName, isFinal);
+                if (isStatic != null) umlModel.addMethodStatic(this.className, methodName, isStatic);
+                if (isFinal != null) umlModel.addMethodFinal(this.className, methodName, isFinal);
                 umlModel.addMethodParams(this.className, methodName, params);
-
             }
-
         }
-
     }
 
     @Override

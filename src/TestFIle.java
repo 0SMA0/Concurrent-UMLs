@@ -29,7 +29,7 @@ public class TestFIle {
     public static String getS() {
         return s;
     }
-    void setS(String s, int one) {
+    public void setS(String s, int one) {
 
     }
 
