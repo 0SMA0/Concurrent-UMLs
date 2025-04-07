@@ -103,6 +103,7 @@ public class FileParser implements Runnable {
             String methodName = methodMatcher.group(5);
             String params = methodMatcher.group(6);
 
+            
             // Taking into account for the constructor
             if ((visibility == null) && (isStatic == null) && (isFinal == null)) {
                 visibility = methodMatcher.group(4);
