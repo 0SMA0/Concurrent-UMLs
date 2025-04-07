@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -99,7 +100,10 @@ public class UMLModel {
         lock.lock();
         try {
             if (attributeName != null && !attributeName.isEmpty()) {
-                classAttributes.computeIfAbsent(className, k -> new ArrayList<>()).add(attributeName);
+                List<String> attributes = classAttributes.computeIfAbsent(className, k -> new ArrayList<>());
+                if (!attributes.contains(attributeName)) {
+                    attributes.add(attributeName);
+                }
             }
         } finally {
             lock.unlock();
@@ -221,24 +225,38 @@ public class UMLModel {
         }
     }
 
-    
+    public String getClassName() {
+        return this.classNames.toString().replace("[", "").replace("]", "");
+    }
+
+    public Collection<List<String>> getAttributesInfo() {
+        // String s = "";
+
+        Collection<List<String>> keys = this.classAttributes.values().;
+        return keys;
+        // return s;
+    }
 
     @Override
     public String toString() {
         String s = "UML MODEL: ";
-        // do a switch case for when it is a class, interface, 
-        
-        // s += "\nClass Name: " + this.classNames + '\n';
-        // s += "Attribute Visibility: " + this.attributeVisibility + "\n";
+        // do a switch case for when it is a class, interface,
+
+        s += "\nClass Name: " + getClassName() + '\n';
+        s += "\n Attributes: " + getAttributesInfo();
+        s += "Attribute Visibility: " + this.attributeVisibility + "\n";
         // s += "Attributes: " + this.classAttributes.values() + "\n";
         // s += "Attribute Return types: " + this.attributeReturnTypes.values();
 
-        s+= "\nMethod Name: " + this.classMethods;
-        s+= "\nMethod Visibility: " + this.methodVisibility;
-        s+= "\nMethod Return Type: " + this.methodReturnTypes.values();
-        s+= "\nMethod Params: " + this.methodParams;
+        // s+= "\nMethod Name: " + this.classMethods;
+        // s+= "\nMethod Visibility: " + this.methodVisibility;
+        // s+= "\nMethod Return Type: " + this.methodReturnTypes.values();
+        // s+= "\nMethod Params: " + this.methodParams;
+
+        // s+= "\nMethod is Static: " + this.methodStatic;
+        // s+= "\nMethod is FInal: " + this.methodFinal;
 
         return s;
     }
 
-} 
+}
