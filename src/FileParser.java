@@ -103,16 +103,24 @@ public class FileParser implements Runnable {
             String methodName = methodMatcher.group(5);
             String params = methodMatcher.group(6);
 
+            // Taking into account for the constructor
             if ((visibility == null) && (isStatic == null) && (isFinal == null)) {
-                // group 4 becomes the visibility
                 visibility = methodMatcher.group(4);
                 methodName = methodMatcher.group(5);
                 params = methodMatcher.group(6);
-                // group 5 becomes the name
-                // group 6 becomes the params
-            } else if (visibility == null) {
-                visibility = "package-private";
+                umlModel.addMethod(this.className, methodName);
+                umlModel.addMethodVisibility(methodName, visibility);
+                umlModel.addMethodParams(this.className, methodName, params);
+            } else {
+                umlModel.addMethodVisibility(methodName, visibility);
+                umlModel.addMethod(this.className, methodName);
+                umlModel.addMethodReturnType(this.className, methodName, returnType);
+                umlModel.addMethodStatic(this.className, methodName, isStatic);
+                umlModel.addMethodFinal(this.className, methodName, isFinal);
+                umlModel.addMethodParams(this.className, methodName, params);
+
             }
+
         }
 
     }
@@ -129,7 +137,7 @@ public class FileParser implements Runnable {
                 parseMethods(line);
             }
 
-            // System.out.println(umlModel.toString());
+            System.out.println(umlModel.toString());
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }

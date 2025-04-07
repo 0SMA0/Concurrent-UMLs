@@ -212,6 +212,15 @@ public class UMLModel {
         }
     }
 
+    public void addMethodParams(String className, String methodName, String params) {
+        lock.lock();
+        try {
+            methodParams.computeIfAbsent(className, k -> new HashMap<>()).put(methodName, params);
+        } finally {
+            lock.unlock();
+        }
+    }
+
     
 
     @Override
@@ -219,10 +228,15 @@ public class UMLModel {
         String s = "UML MODEL: ";
         // do a switch case for when it is a class, interface, 
         
-        s += "\nClass Name: " + this.classNames + '\n';
-        s += "Attribute Visibility: " + this.attributeVisibility + "\n";
-        s += "Attributes: " + this.classAttributes.values() + "\n";
-        s += "Attribute Return types: " + this.attributeReturnTypes.values();
+        // s += "\nClass Name: " + this.classNames + '\n';
+        // s += "Attribute Visibility: " + this.attributeVisibility + "\n";
+        // s += "Attributes: " + this.classAttributes.values() + "\n";
+        // s += "Attribute Return types: " + this.attributeReturnTypes.values();
+
+        s+= "\nMethod Name: " + this.classMethods;
+        s+= "\nMethod Visibility: " + this.methodVisibility;
+        s+= "\nMethod Return Type: " + this.methodReturnTypes.values();
+        s+= "\nMethod Params: " + this.methodParams;
 
         return s;
     }
