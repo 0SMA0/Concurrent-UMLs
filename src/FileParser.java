@@ -27,8 +27,8 @@ public class FileParser implements Runnable {
                     "\\s*(=.*)?;");
 
     private static final Pattern METHOD_PATTERN = Pattern.compile(
-        "^\\s*(public|protected|private)?\\s*(static)?\\s*(final)?\\s*(?:([\\w<>\\[\\]]+)\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*\\{?"
-        );
+            "^\\s*(public|protected|private)?\\s*(static)?\\s*(final)?\\s*(?:([\\w<>\\[\\]]+)\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*\\{?");
+
     public FileParser(String filePath, UMLModel umlModel) {
         this.filePath = filePath;
         this.umlModel = umlModel;
@@ -67,19 +67,16 @@ public class FileParser implements Runnable {
         if (attributeMatcher.find()) {
             // Get the groups for visibility, return type, attribute name, and assignment
             String visibility = attributeMatcher.group(1); // will always stay the same
-
             // Can add a ternary to switch the groups
             Boolean isStatic = (attributeMatcher.group(2) == "static") ? true : null;
             Boolean isFinal = (attributeMatcher.group(3) == "final") ? true : null;
             String returnType = attributeMatcher.group(4);
             String attributeName = attributeMatcher.group(5);
             String attributeAssignment = attributeMatcher.group(6);
-
             // Check if visibility is null, then assign package-private
             if (visibility == null) {
                 visibility = "package-private";
             }
-
             umlModel.addAttribute(this.className, attributeName);
             umlModel.addAttributeVisibility(attributeName, visibility);
             umlModel.addAttributeStatic(this.className, attributeName, isStatic);
@@ -92,7 +89,7 @@ public class FileParser implements Runnable {
 
     private void parseMethods(String line) {
         Matcher methodMatcher = METHOD_PATTERN.matcher(line);
-    
+
         if (methodMatcher.find()) {
             String visibility = methodMatcher.group(1);
             Boolean isStatic = "static".equals(methodMatcher.group(2)) ? true : null;
@@ -100,12 +97,12 @@ public class FileParser implements Runnable {
             String returnType = methodMatcher.group(4);
             String methodName = methodMatcher.group(5);
             String params = methodMatcher.group(6);
-    
+
             // If there is no visibility modifier (e.g., package-private)
             if (visibility == null) {
                 visibility = "package-private";
             }
-    
+
             // Taking into account for the constructor
             if (returnType == null || methodName.equals(this.className)) {
                 // Constructor
@@ -117,8 +114,10 @@ public class FileParser implements Runnable {
                 umlModel.addMethodVisibility(methodName, visibility);
                 umlModel.addMethod(this.className, methodName);
                 umlModel.addMethodReturnType(this.className, methodName, returnType);
-                if (isStatic != null) umlModel.addMethodStatic(this.className, methodName, isStatic);
-                if (isFinal != null) umlModel.addMethodFinal(this.className, methodName, isFinal);
+                if (isStatic != null)
+                    umlModel.addMethodStatic(this.className, methodName, isStatic);
+                if (isFinal != null)
+                    umlModel.addMethodFinal(this.className, methodName, isFinal);
                 umlModel.addMethodParams(this.className, methodName, params);
             }
         }

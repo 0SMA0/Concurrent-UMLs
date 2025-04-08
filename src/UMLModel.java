@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -122,8 +121,10 @@ public class UMLModel {
     public void addAttributeVisibility(String attributeName, String visibility) {
         lock.lock();
         try {
-            if (visibility != null) {
-                attributeVisibility.put(attributeName, visibility);
+            
+                if (!attributeVisibility.containsKey(attributeName)) {
+                    attributeVisibility.put(attributeName, visibility);
+                
             }
         } finally {
             lock.unlock();
@@ -229,10 +230,17 @@ public class UMLModel {
         return this.classNames.toString().replace("[", "").replace("]", "");
     }
 
-    public Collection<List<String>> getAttributesInfo() {
+    public List<String> getAttributesInfo() {
         // String s = "";
 
-        Collection<List<String>> keys = this.classAttributes.values().;
+        String className = getClassName();
+    
+        List<String> keys = this.classAttributes.get(className);
+        for (String key : keys) {
+            String visibility = this.attributeVisibility.get(key);
+            System.out.println(visibility);
+
+        }
         return keys;
         // return s;
     }
@@ -249,7 +257,7 @@ public class UMLModel {
         // s += "Attribute Return types: " + this.attributeReturnTypes.values();
 
         // s+= "\nMethod Name: " + this.classMethods;
-        // s+= "\nMethod Visibility: " + this.methodVisibility;
+        s+= "\nMethod Visibility: " + this.methodVisibility;
         // s+= "\nMethod Return Type: " + this.methodReturnTypes.values();
         // s+= "\nMethod Params: " + this.methodParams;
 

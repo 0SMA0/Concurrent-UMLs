@@ -5,6 +5,7 @@ public class TestFIle {
     static String name = "A"; // Static + Type + Name
     final double y = 1; // Final + Type + Name
     public static final String s = "s";
+    protected String thing;
 
 
     public TestFIle(int z){
