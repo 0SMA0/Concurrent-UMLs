@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class TestFIle {
     int z;              //package private
     String e;           //package private
@@ -7,6 +10,7 @@ public class TestFIle {
     public static final String s = "s";
     protected String thing;
     private final String sam = "sam";
+    public List<String> hehe = new ArrayList<>();
 
 
     public TestFIle(int z){

@@ -246,6 +246,7 @@ public class UMLModel {
             boolean isFinal = this.attributeFinal.get(className).containsKey(key);
             boolean isStatic = this.attributeStatic.get(className).containsKey(key);
             String attributeName = key;
+            boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
             if (isFinal) {
                 attributeName = key.toUpperCase();
             }
@@ -272,9 +273,21 @@ public class UMLModel {
             }
             s += attributeName + " : ";
             s += returnType;
+            if(hasInitial) {
+                s += this.attributeInitialValues.get(className).get(key);
+            }
             attributeList.add(s);
         }
         return attributeList;
+    }
+
+    public ArrayList<String> getMethodInfo(){
+        ArrayList<String> methodList = new ArrayList<>();
+
+
+
+
+        return methodList;
     }
 
     @Override
