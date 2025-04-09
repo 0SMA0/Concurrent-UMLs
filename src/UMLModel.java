@@ -166,7 +166,6 @@ public class UMLModel {
         lock.lock();
         try {
             if (isFinal != null) {
-                System.out.println("entered");
                 attributeFinal.computeIfAbsent(className, k -> new HashMap<>()).put(attributeName, isFinal);
             }
         } finally {
