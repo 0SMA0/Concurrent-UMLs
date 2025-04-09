@@ -20,12 +20,14 @@ public class FileParser implements Runnable {
             .compile("^\\s*(?:public\\s+)?abstract\\s+class\\s+([a-zA-Z_][a-zA-Z0-9_]*)", Pattern.MULTILINE);
 
     private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(
-            "^\\s*(public|private|protected)?\\s*" +
-                    "(static\\s+)?(final\\s+)?" +
-                    "([\\w<>\\[\\]]+)\\s+" +
-                    "([a-zA-Z_][a-zA-Z0-9_]*)" +
-                    "\\s*(=.*)?;");
-
+                "^\\s*(public|private|protected)?\\s*" +        // Group 1: visibility
+                "(static)?\\s*" +                               // Group 2: static keyword (optional)
+                "(final)?\\s*" +                                // Group 3: final keyword (optional)
+                "([\\w<>\\[\\]]+)\\s+" +                        // Group 4: return/type
+                "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" +                // Group 5: attribute name
+                "(=\\s*[^;]+)?;"                                // Group 6: assignment (optional)
+    );
+    
     private static final Pattern METHOD_PATTERN = Pattern.compile(
             "^\\s*(public|protected|private)?\\s*(static)?\\s*(final)?\\s*(?:([\\w<>\\[\\]]+)\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*\\{?");
 
@@ -68,8 +70,8 @@ public class FileParser implements Runnable {
             // Get the groups for visibility, return type, attribute name, and assignment
             String visibility = attributeMatcher.group(1); // will always stay the same
             // Can add a ternary to switch the groups
-            Boolean isStatic = (attributeMatcher.group(2) == "static") ? true : null;
-            Boolean isFinal = (attributeMatcher.group(3) == "final") ? true : null;
+            Boolean isStatic = "static".equals(attributeMatcher.group(2)) ? true : null;
+            Boolean isFinal = "final".equals(attributeMatcher.group(3)) ? true : null;
             String returnType = attributeMatcher.group(4);
             String attributeName = attributeMatcher.group(5);
             String attributeAssignment = attributeMatcher.group(6);

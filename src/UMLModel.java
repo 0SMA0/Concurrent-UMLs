@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -121,10 +122,10 @@ public class UMLModel {
     public void addAttributeVisibility(String attributeName, String visibility) {
         lock.lock();
         try {
-            
-                if (!attributeVisibility.containsKey(attributeName)) {
-                    attributeVisibility.put(attributeName, visibility);
-                
+
+            if (!attributeVisibility.containsKey(attributeName)) {
+                attributeVisibility.put(attributeName, visibility);
+
             }
         } finally {
             lock.unlock();
@@ -152,7 +153,7 @@ public class UMLModel {
     public void addAttributeReturnType(String className, String attributeName, String returnType) {
         lock.lock();
         try {
-            if (returnType != null && !returnType.isEmpty()) {
+            if (returnType != null && !returnType.isEmpty() && !returnType.equals("return")) {
                 attributeReturnTypes.computeIfAbsent(className, k -> new HashMap<>()).put(attributeName, returnType);
             }
         } finally {
@@ -165,6 +166,7 @@ public class UMLModel {
         lock.lock();
         try {
             if (isFinal != null) {
+                System.out.println("entered");
                 attributeFinal.computeIfAbsent(className, k -> new HashMap<>()).put(attributeName, isFinal);
             }
         } finally {
@@ -231,18 +233,51 @@ public class UMLModel {
     }
 
     public List<String> getAttributesInfo() {
-        // String s = "";
-
+        List<String> attributeList = new ArrayList<>();
         String className = getClassName();
-    
+
         List<String> keys = this.classAttributes.get(className);
+        System.out.println(this.attributeFinal);
+        // System.out.println(keys);
         for (String key : keys) {
+            String s = "";
             String visibility = this.attributeVisibility.get(key);
-            System.out.println(visibility);
+            String symbol;
+            // get symbol from enum
+            switch (visibility) {
+                case "public":
+                    symbol = Visibility.PUBLIC.getVisibility();
+                    s += symbol + " ";
+                    break;
+                case "private":
+                    symbol = Visibility.PRIVATE.getVisibility();
+                    s += symbol + " ";
+                    break;
+                case "protected":
+                    symbol = Visibility.PROTECTED.getVisibility();
+                    s += symbol + " ";
+                    break;
+                case "package-private":
+                    symbol = Visibility.PACAKAGE_PRIVATE.getVisibility();
+                    s += symbol + " ";
+                    break;
+            }
+            String attributeName = key;
+            String returnType = this.attributeReturnTypes.get(className).get(key);
+            boolean isFinal = this.attributeFinal.get(className).containsKey(key);
+            if(isFinal) {
+
+            }
+            // boolean staticCheck = this.attributeStatic.get(className).containsKey(key);
+            // String staticKeyword =
+            // boolean finalKeyword = (this.attributeFinal.get(className).get(key) == true)
+            // ? attributeName.toUpperCase() : false;
+            // construct attribues
+
+            // s += visibility + staticKeyword + returnType ;
 
         }
-        return keys;
-        // return s;
+        return attributeList;
     }
 
     @Override
@@ -250,14 +285,20 @@ public class UMLModel {
         String s = "UML MODEL: ";
         // do a switch case for when it is a class, interface,
 
-        s += "\nClass Name: " + getClassName() + '\n';
-        s += "\n Attributes: " + getAttributesInfo();
-        s += "Attribute Visibility: " + this.attributeVisibility + "\n";
+        // s += "\nClass Name: " + getClassName() + '\n';
+        // s += "\n Attributes: " + getAttributesInfo();
+        s += "\nAttribute Names: " + this.classAttributes;
+        s += "\nReturn Type: " + this.attributeReturnTypes;
+        s += "\n initial assignment: " + this.attributeInitialValues;
+        s += "\nisFinal: "+this.attributeFinal;
+        s += "\nisStatic: " + this.attributeStatic;
+
+        // s += "Attribute Visibility: " + this.attributeVisibility + "\n";
         // s += "Attributes: " + this.classAttributes.values() + "\n";
         // s += "Attribute Return types: " + this.attributeReturnTypes.values();
 
         // s+= "\nMethod Name: " + this.classMethods;
-        s+= "\nMethod Visibility: " + this.methodVisibility;
+        // s+= "\nMethod Visibility: " + this.methodVisibility;
         // s+= "\nMethod Return Type: " + this.methodReturnTypes.values();
         // s+= "\nMethod Params: " + this.methodParams;
 
