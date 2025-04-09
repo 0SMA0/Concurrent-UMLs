@@ -3,7 +3,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -243,10 +242,18 @@ public class UMLModel {
             String visibility = this.attributeVisibility.get(key);
             String symbol;
             // get symbol from enum
+            String returnType = this.attributeReturnTypes.get(className).get(key);
+            boolean isFinal = this.attributeFinal.get(className).containsKey(key);
+            String attributeName = key;
+            if (isFinal) {
+                attributeName = key.toUpperCase();
+            }
             switch (visibility) {
                 case "public":
                     symbol = Visibility.PUBLIC.getVisibility();
                     s += symbol + " ";
+                    s += key + " : ";
+                    s += returnType;
                     break;
                 case "private":
                     symbol = Visibility.PRIVATE.getVisibility();
@@ -260,12 +267,6 @@ public class UMLModel {
                     symbol = Visibility.PACAKAGE_PRIVATE.getVisibility();
                     s += symbol + " ";
                     break;
-            }
-            String attributeName = key;
-            String returnType = this.attributeReturnTypes.get(className).get(key);
-            boolean isFinal = this.attributeFinal.get(className).containsKey(key);
-            if(isFinal) {
-
             }
             // boolean staticCheck = this.attributeStatic.get(className).containsKey(key);
             // String staticKeyword =
@@ -285,12 +286,12 @@ public class UMLModel {
         // do a switch case for when it is a class, interface,
 
         // s += "\nClass Name: " + getClassName() + '\n';
-        // s += "\n Attributes: " + getAttributesInfo();
-        s += "\nAttribute Names: " + this.classAttributes;
-        s += "\nReturn Type: " + this.attributeReturnTypes;
-        s += "\n initial assignment: " + this.attributeInitialValues;
-        s += "\nisFinal: "+this.attributeFinal;
-        s += "\nisStatic: " + this.attributeStatic;
+        s += "\n Attributes: " + getAttributesInfo();
+        // s += "\nAttribute Names: " + this.classAttributes;
+        // s += "\nReturn Type: " + this.attributeReturnTypes;
+        // s += "\n initial assignment: " + this.attributeInitialValues;
+        // s += "\nisFinal: "+this.attributeFinal;
+        // s += "\nisStatic: " + this.attributeStatic;
 
         // s += "Attribute Visibility: " + this.attributeVisibility + "\n";
         // s += "Attributes: " + this.classAttributes.values() + "\n";
