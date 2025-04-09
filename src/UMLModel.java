@@ -244,16 +244,18 @@ public class UMLModel {
             // get symbol from enum
             String returnType = this.attributeReturnTypes.get(className).get(key);
             boolean isFinal = this.attributeFinal.get(className).containsKey(key);
+            boolean isStatic = this.attributeStatic.get(className).containsKey(key);
             String attributeName = key;
             if (isFinal) {
                 attributeName = key.toUpperCase();
             }
+            if (isStatic) {
+                s += "{static}";
+            }
             switch (visibility) {
                 case "public":
                     symbol = Visibility.PUBLIC.getVisibility();
-                    s += symbol + " ";
-                    s += key + " : ";
-                    s += returnType;
+                    s += symbol;
                     break;
                 case "private":
                     symbol = Visibility.PRIVATE.getVisibility();
@@ -268,14 +270,9 @@ public class UMLModel {
                     s += symbol + " ";
                     break;
             }
-            // boolean staticCheck = this.attributeStatic.get(className).containsKey(key);
-            // String staticKeyword =
-            // boolean finalKeyword = (this.attributeFinal.get(className).get(key) == true)
-            // ? attributeName.toUpperCase() : false;
-            // construct attribues
-
-            // s += visibility + staticKeyword + returnType ;
-
+            s += attributeName + " : ";
+            s += returnType;
+            attributeList.add(s);
         }
         return attributeList;
     }
