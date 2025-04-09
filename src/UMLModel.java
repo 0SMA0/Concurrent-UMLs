@@ -230,6 +230,25 @@ public class UMLModel {
         return this.classNames.toString().replace("[", "").replace("]", "");
     }
 
+    public String convertVisibilityToSymbol(String visibility){
+        String symbol = "";
+        switch (visibility) {
+            case "public":
+                symbol = Visibility.PUBLIC.getVisibility();
+                break;
+            case "private":
+                symbol = Visibility.PRIVATE.getVisibility();
+                break;
+            case "protected":
+                symbol = Visibility.PROTECTED.getVisibility();
+                break;
+            case "package-private":
+                symbol = Visibility.PACAKAGE_PRIVATE.getVisibility();
+                break;
+            }
+        return symbol;
+        }
+
     public List<String> getAttributesInfo() {
         List<String> attributeList = new ArrayList<>();
         String className = getClassName();
@@ -240,51 +259,59 @@ public class UMLModel {
         for (String key : keys) {
             String s = "";
             String visibility = this.attributeVisibility.get(key);
-            String symbol;
+            String symbol = convertVisibilityToSymbol(visibility);
             // get symbol from enum
             String returnType = this.attributeReturnTypes.get(className).get(key);
             boolean isFinal = this.attributeFinal.get(className).containsKey(key);
             boolean isStatic = this.attributeStatic.get(className).containsKey(key);
             String attributeName = key;
             boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
+            s += symbol;
             if (isFinal) {
                 attributeName = key.toUpperCase();
             }
             if (isStatic) {
                 s += "{static}";
             }
-            switch (visibility) {
-                case "public":
-                    symbol = Visibility.PUBLIC.getVisibility();
-                    s += symbol;
-                    break;
-                case "private":
-                    symbol = Visibility.PRIVATE.getVisibility();
-                    s += symbol + " ";
-                    break;
-                case "protected":
-                    symbol = Visibility.PROTECTED.getVisibility();
-                    s += symbol + " ";
-                    break;
-                case "package-private":
-                    symbol = Visibility.PACAKAGE_PRIVATE.getVisibility();
-                    s += symbol + " ";
-                    break;
-            }
             s += attributeName + " : ";
             s += returnType;
             if(hasInitial) {
-                s += this.attributeInitialValues.get(className).get(key);
+                s += " " + this.attributeInitialValues.get(className).get(key);
             }
             attributeList.add(s);
         }
         return attributeList;
     }
 
-    public ArrayList<String> getMethodInfo(){
+    public List<String> getMethodInfo(){
         ArrayList<String> methodList = new ArrayList<>();
+        String className = getClassName();
 
+        List<String> keys = this.classMethods.get(className);
+        for (String key : keys) {
+            String s = "";
+            String methodName = key;
+            String visibility = this.methodVisibility.get(key);
+            String symbol = convertVisibilityToSymbol(visibility);
+            boolean isFinal = this.methodFinal.get(className).containsKey(key);
+            boolean isStatic = this.methodStatic.get(className).containsKey(key);
 
+            
+            if(methodName.equals(className)){
+                s += "<<create>> ";
+            }
+            s += symbol;
+            
+            if (isFinal) {
+                methodName = key.toUpperCase();
+            }
+            if (isStatic) {
+                s += "{static}";
+            }
+            s += methodName;
+            
+            methodList.add(s);
+        }
 
 
         return methodList;
@@ -296,7 +323,7 @@ public class UMLModel {
         // do a switch case for when it is a class, interface,
 
         // s += "\nClass Name: " + getClassName() + '\n';
-        s += "\n Attributes: " + getAttributesInfo();
+        s += "\n Methods: " + getMethodInfo();
         // s += "\nAttribute Names: " + this.classAttributes;
         // s += "\nReturn Type: " + this.attributeReturnTypes;
         // s += "\n initial assignment: " + this.attributeInitialValues;

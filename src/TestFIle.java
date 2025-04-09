@@ -12,6 +12,9 @@ public class TestFIle {
     private final String sam = "sam";
     public List<String> hehe = new ArrayList<>();
 
+    public TestFIle(String e){
+        this.e = e;
+    }
 
     public TestFIle(int z){
         this.z = z;
