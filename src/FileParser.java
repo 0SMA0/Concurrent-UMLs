@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,14 +21,14 @@ public class FileParser implements Runnable {
             .compile("^\\s*(?:public\\s+)?abstract\\s+class\\s+([a-zA-Z_][a-zA-Z0-9_]*)", Pattern.MULTILINE);
 
     private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(
-                "^\\s*(public|private|protected)?\\s*" +        // Group 1: visibility
-                "(static)?\\s*" +                               // Group 2: static keyword (optional)
-                "(final)?\\s*" +                                // Group 3: final keyword (optional)
-                "([\\w<>\\[\\]]+)\\s+" +                        // Group 4: return/type
-                "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" +                // Group 5: attribute name
-                "(=\\s*[^;]+)?;"                                // Group 6: assignment (optional)
+            "^\\s*(public|private|protected)?\\s*" + // Group 1: visibility
+                    "(static)?\\s*" + // Group 2: static keyword (optional)
+                    "(final)?\\s*" + // Group 3: final keyword (optional)
+                    "([\\w<>\\[\\]]+)\\s+" + // Group 4: return/type
+                    "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" + // Group 5: attribute name
+                    "(=\\s*[^;]+)?;" // Group 6: assignment (optional)
     );
-    
+
     private static final Pattern METHOD_PATTERN = Pattern.compile(
             "^\\s*(public|protected|private)?\\s*(static)?\\s*(final)?\\s*(?:([\\w<>\\[\\]]+)\\s+)?(\\w+)\\s*\\(([^)]*)\\)\\s*\\{?");
 

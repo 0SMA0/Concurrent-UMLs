@@ -221,6 +221,7 @@ public class UMLModel {
         lock.lock();
         try {
             methodParams.computeIfAbsent(className, k -> new HashMap<>()).put(methodName, params);
+
         } finally {
             lock.unlock();
         }
@@ -230,7 +231,7 @@ public class UMLModel {
         return this.classNames.toString().replace("[", "").replace("]", "");
     }
 
-    public String convertVisibilityToSymbol(String visibility){
+    public String convertVisibilityToSymbol(String visibility) {
         String symbol = "";
         switch (visibility) {
             case "public":
@@ -245,9 +246,9 @@ public class UMLModel {
             case "package-private":
                 symbol = Visibility.PACAKAGE_PRIVATE.getVisibility();
                 break;
-            }
-        return symbol;
         }
+        return symbol;
+    }
 
     public List<String> getAttributesInfo() {
         List<String> attributeList = new ArrayList<>();
@@ -275,7 +276,7 @@ public class UMLModel {
             }
             s += attributeName + " : ";
             s += returnType;
-            if(hasInitial) {
+            if (hasInitial) {
                 s += " " + this.attributeInitialValues.get(className).get(key);
             }
             attributeList.add(s);
@@ -283,7 +284,7 @@ public class UMLModel {
         return attributeList;
     }
 
-    public List<String> getMethodInfo(){
+    public List<String> getMethodInfo() {
         ArrayList<String> methodList = new ArrayList<>();
         String className = getClassName();
 
@@ -295,24 +296,49 @@ public class UMLModel {
             String symbol = convertVisibilityToSymbol(visibility);
             boolean isFinal = this.methodFinal.get(className).containsKey(key);
             boolean isStatic = this.methodStatic.get(className).containsKey(key);
+            String params = this.methodParams.get(className).get(key);
+            String[] split = params.split(",");
 
-            
-            if(methodName.equals(className)){
+            ArrayList<String> paramsList = new ArrayList<>();
+            if (split[0] != "") {
+                if (split.length > 1) {
+                    for (int i = 0; i < split.length; i++) {
+                        String paramFormated = "";
+                        String[] whole = split[i].trim().split(" ");
+                        String paramReturnType = whole[0];
+                        String paramName = whole[1];
+                        paramFormated += paramName + ": " + paramReturnType;
+                        System.out.println(paramFormated);
+                        paramsList.add(paramFormated);
+                    }
+                } else if(split.length == 1) {
+                    String whole = split[0];
+                    String [] singleSplit = whole.split(" ");
+                    String paramFormated = "";
+                    String paramReturnType = singleSplit[0];
+                    String paramName = singleSplit[1];
+                    paramFormated += paramName + ": " + paramReturnType;
+                    System.out.println(paramFormated);
+                    paramsList.add(paramFormated);
+                }
+            }
+            String formatedParamList = paramsList.toString().replace("[", "(").replace("]", ")");
+
+            if (methodName.equals(className)) {
                 s += "<<create>> ";
             }
             s += symbol;
-            
+
             if (isFinal) {
                 methodName = key.toUpperCase();
             }
             if (isStatic) {
                 s += "{static}";
             }
-            s += methodName;
-            
+            s += methodName + formatedParamList;
+
             methodList.add(s);
         }
-
 
         return methodList;
     }

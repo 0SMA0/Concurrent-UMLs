@@ -12,12 +12,10 @@ public class TestFIle {
     private final String sam = "sam";
     public List<String> hehe = new ArrayList<>();
 
+    // didn't account for methods with the same name, but diff params
+
     public TestFIle(String e){
         this.e = e;
-    }
-
-    public TestFIle(int z){
-        this.z = z;
     }
 
     public final int getZ() {
