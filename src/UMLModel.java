@@ -68,7 +68,7 @@ public class UMLModel {
             classNames.add(className);
             classMethods.putIfAbsent(className, new ArrayList<>());
             classAttributes.putIfAbsent(className, new ArrayList<>());
-            System.out.println("\nAdded to UML Class: " + getClassName());
+            // System.out.println("\nAdded to UML Class: " + getClassName());
         } finally {
             lock.unlock();
         }
@@ -208,6 +208,7 @@ public class UMLModel {
         lock.lock();
         try {
             if (assignmentValue != null && !assignmentValue.isEmpty()) {
+                assignmentValue = assignmentValue.replace("(", "").replace(")", "");
                 attributeInitialValues
                         .computeIfAbsent(className, k -> new HashMap<>())
                         .put(attributeName, assignmentValue);

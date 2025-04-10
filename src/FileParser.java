@@ -137,7 +137,6 @@ public class FileParser implements Runnable {
                 parseMethods(line);
             }
 
-            System.out.println(umlModel.toString());
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }
@@ -148,6 +147,16 @@ public class FileParser implements Runnable {
         FileParser parser = new FileParser("src//TestFIle.java", model);
         Thread thread = new Thread(parser);
         thread.start();
+        try {
+            // Wait for the parser thread to finish
+            thread.join();
+
+            PlantUmlGenerator gene = new PlantUmlGenerator(model);
+            gene.generateToFile("output.puml");
+
+        } catch (InterruptedException e) {
+            System.err.println("Thread interrupted: " + e);
+        }
     }
 
 }
