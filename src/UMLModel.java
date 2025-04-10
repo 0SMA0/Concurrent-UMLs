@@ -68,7 +68,7 @@ public class UMLModel {
             classNames.add(className);
             classMethods.putIfAbsent(className, new ArrayList<>());
             classAttributes.putIfAbsent(className, new ArrayList<>());
-            System.out.println("\n Added to UML Class: CLASS NAME");
+            System.out.println("\nAdded to UML Class: " + getClassName());
         } finally {
             lock.unlock();
         }
@@ -255,13 +255,10 @@ public class UMLModel {
         String className = getClassName();
 
         List<String> keys = this.classAttributes.get(className);
-        System.out.println(this.attributeFinal);
-        // System.out.println(keys);
         for (String key : keys) {
             String s = "";
             String visibility = this.attributeVisibility.get(key);
             String symbol = convertVisibilityToSymbol(visibility);
-            // get symbol from enum
             String returnType = this.attributeReturnTypes.get(className).get(key);
             boolean isFinal = this.attributeFinal.get(className).containsKey(key);
             boolean isStatic = this.attributeStatic.get(className).containsKey(key);
@@ -308,7 +305,6 @@ public class UMLModel {
                         String paramReturnType = whole[0];
                         String paramName = whole[1];
                         paramFormated += paramName + ": " + paramReturnType;
-                        System.out.println(paramFormated);
                         paramsList.add(paramFormated);
                     }
                 } else if(split.length == 1) {
@@ -318,7 +314,6 @@ public class UMLModel {
                     String paramReturnType = singleSplit[0];
                     String paramName = singleSplit[1];
                     paramFormated += paramName + ": " + paramReturnType;
-                    System.out.println(paramFormated);
                     paramsList.add(paramFormated);
                 }
             }
@@ -346,10 +341,9 @@ public class UMLModel {
     @Override
     public String toString() {
         String s = "UML MODEL: ";
-        // do a switch case for when it is a class, interface,
-
         // s += "\nClass Name: " + getClassName() + '\n';
-        s += "\n Methods: " + getMethodInfo();
+        s += "\nMethods: " + getMethodInfo();
+        s += "\nAttribute: " + getAttributesInfo();
         // s += "\nAttribute Names: " + this.classAttributes;
         // s += "\nReturn Type: " + this.attributeReturnTypes;
         // s += "\n initial assignment: " + this.attributeInitialValues;

@@ -1,0 +1,4 @@
+Added to UML Class: TestFIle
+UML MODEL: 
+Methods: [<<create>> +TestFIle(e: String), +GETZ(), +getE(), +getX(), +{static}getName(), +getY(), +{static}getS(), +setS(s: String, one: int)]
+Attribute: [~z : int, ~e : String, -x : int = 5, ~{static}name : String = "A", ~Y : double = 1, +{static}S : String = "s", #thing : String, -SAM : String = "sam", +hehe : List<String> = new ArrayList<>()]
