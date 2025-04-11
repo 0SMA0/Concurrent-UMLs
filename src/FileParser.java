@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -125,16 +126,68 @@ public class FileParser implements Runnable {
         }
     }
 
+    private List<String> filteringLines(List<String> lines) {
+        List<String> filteredLines = new ArrayList<>();
+        int braceDepth = 0;
+        boolean insideMethod = false;
+    
+        for (String line : lines) {
+            String trimmed = line.trim();
+    
+            // Detect method signature (simplified, can be improved with regex if needed)
+            boolean looksLikeMethod = trimmed.matches(".*\\)\\s*\\{\\s*");
+    
+            // If we're not in a method, and the line looks like a method declaration, start skipping
+            if (!insideMethod && looksLikeMethod) {
+                insideMethod = true;
+                braceDepth = 1; // we've seen the first {
+                continue; // skip method declaration line
+            }
+    
+            // If we're inside a method body
+            if (insideMethod) {
+                braceDepth += countChar(trimmed, '{');
+                braceDepth -= countChar(trimmed, '}');
+    
+                if (braceDepth == 0) {
+                    insideMethod = false; // method body ended
+                }
+    
+                continue; // skip method body lines
+            }
+    
+            // If not inside a method, keep the line
+            filteredLines.add(line);
+        }
+    
+        return filteredLines;
+    }
+    
+    // Helper function to count occurrences of a character
+    private int countChar(String line, char ch) {
+        int count = 0;
+        for (char c : line.toCharArray()) {
+            if (c == ch) count++;
+        }
+        return count;
+    }
+    
+
     @Override
     public void run() {
 
         try {
             List<String> lines = Files.readAllLines(new File(filePath).toPath());
+            // lines = filteringLines(lines);
             // System.out.println(lines);
+            // need to take into account for the stuff in between the {}
             for (String line : lines) {
                 parseClassInterfaceAbstractName(line);
+                if (line.endsWith("{") && !line.contains("        ")) {
+                    parseMethods(line);
+                }
+                
                 parseAttributeInfo(line);
-                parseMethods(line);
             }
 
         } catch (IOException e) {
@@ -144,9 +197,12 @@ public class FileParser implements Runnable {
 
     public static void main(String[] args) {
         UMLModel model = new UMLModel();
-        FileParser parser = new FileParser("src//TestFIle.java", model);
+        FileParser parser = new FileParser("src//FileParser.java", model);
+        // FileParser parser2 = new FileParser("src\\UMLModel.java", new UMLModel());
         Thread thread = new Thread(parser);
         thread.start();
+        // Thread thread2 = new Thread(parser2);
+        // thread2.start();
         try {
             // Wait for the parser thread to finish
             thread.join();

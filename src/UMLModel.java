@@ -262,20 +262,25 @@ public class UMLModel {
             String symbol = convertVisibilityToSymbol(visibility);
             String returnType = this.attributeReturnTypes.get(className).get(key);
             boolean isFinal = this.attributeFinal.get(className).containsKey(key);
-            boolean isStatic = this.attributeStatic.get(className).containsKey(key);
-            String attributeName = key;
-            boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
             s += symbol;
-            if (isFinal) {
-                attributeName = key.toUpperCase();
+            if (this.attributeStatic.containsKey(className)) {
+                boolean isStatic = this.attributeStatic.get(className).containsKey(key);
+                if (isStatic) {
+                    s += "{static}";
+                }
             }
-            if (isStatic) {
-                s += "{static}";
-            }
+            String attributeName = key;
             s += attributeName + " : ";
             s += returnType;
-            if (hasInitial) {
-                s += " " + this.attributeInitialValues.get(className).get(key);
+            if(this.attributeInitialValues.containsKey(className)) {
+                boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
+                if (hasInitial) {
+                    s += " " + this.attributeInitialValues.get(className).get(key);
+                }
+
+            }
+            if (isFinal) {
+                attributeName = key.toUpperCase();
             }
             attributeList.add(s);
         }
@@ -292,11 +297,25 @@ public class UMLModel {
             String methodName = key;
             String visibility = this.methodVisibility.get(key);
             String symbol = convertVisibilityToSymbol(visibility);
-            boolean isFinal = this.methodFinal.get(className).containsKey(key);
-            boolean isStatic = this.methodStatic.get(className).containsKey(key);
+            if (methodName.equals(className)) {
+                s += "<<create>> ";
+            }
+            s += symbol;
+            if (this.methodFinal.containsKey(className)) {
+                boolean isFinal = this.methodFinal.get(className).containsKey(key);
+                if (isFinal) {
+                    methodName = key.toUpperCase();
+                }
+            }
+            if (this.methodStatic.containsKey(className)) {
+                boolean isStatic = this.methodStatic.get(className).containsKey(key);
+                if (isStatic) {
+                    s += "{static}";
+                }
+            }
             String params = this.methodParams.get(className).get(key);
             String[] split = params.split(",");
-
+            
             ArrayList<String> paramsList = new ArrayList<>();
             if (split[0] != "") {
                 if (split.length > 1) {
@@ -313,24 +332,14 @@ public class UMLModel {
                     String [] singleSplit = whole.split(" ");
                     String paramFormated = "";
                     String paramReturnType = singleSplit[0];
-                    String paramName = singleSplit[1];
+                    String paramName = singleSplit[singleSplit.length-1];
                     paramFormated += paramName + ": " + paramReturnType;
                     paramsList.add(paramFormated);
                 }
             }
             String formatedParamList = paramsList.toString().replace("[", "(").replace("]", ")");
 
-            if (methodName.equals(className)) {
-                s += "<<create>> ";
-            }
-            s += symbol;
 
-            if (isFinal) {
-                methodName = key.toUpperCase();
-            }
-            if (isStatic) {
-                s += "{static}";
-            }
             s += methodName + formatedParamList;
 
             methodList.add(s);
