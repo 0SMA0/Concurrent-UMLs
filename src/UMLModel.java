@@ -261,7 +261,10 @@ public class UMLModel {
             String visibility = this.attributeVisibility.get(key);
             String symbol = convertVisibilityToSymbol(visibility);
             String returnType = this.attributeReturnTypes.get(className).get(key);
-            boolean isFinal = this.attributeFinal.get(className).containsKey(key);
+            boolean isFinal = false;
+            if(this.attributeFinal.containsKey(className)) {
+                isFinal = this.attributeFinal.get(className).containsKey(key);
+            }
             s += symbol;
             if (this.attributeStatic.containsKey(className)) {
                 boolean isStatic = this.attributeStatic.get(className).containsKey(key);
@@ -338,9 +341,13 @@ public class UMLModel {
                 }
             }
             String formatedParamList = paramsList.toString().replace("[", "(").replace("]", ")");
-
-
+            
             s += methodName + formatedParamList;
+            Boolean hasReturn;
+            if (this.methodReturnTypes.containsKey(className)) {
+                hasReturn = this.methodReturnTypes.get(className).containsKey(key);
+                if (hasReturn) s += " : "+this.methodReturnTypes.get(className).get(key);
+            }
 
             methodList.add(s);
         }
@@ -374,5 +381,6 @@ public class UMLModel {
 
         return s;
     }
+
 
 }
