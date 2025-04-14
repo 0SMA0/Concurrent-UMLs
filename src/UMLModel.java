@@ -80,6 +80,7 @@ public class UMLModel {
             interfaceNames.add(interfaceName);
             classMethods.putIfAbsent(interfaceName, new ArrayList<>());
         } finally {
+            // System.out.println("added");
             lock.unlock();
         }
     }
@@ -232,6 +233,12 @@ public class UMLModel {
         return this.classNames.toString().replace("[", "").replace("]", "");
     }
 
+    public String getInterfaceName() {
+        return this.interfaceNames.toString().replace("[", "").replace("]", "");
+    }
+    
+
+
     public String convertVisibilityToSymbol(String visibility) {
         String symbol = "";
         switch (visibility) {
@@ -254,8 +261,14 @@ public class UMLModel {
     public List<String> getAttributesInfo() {
         List<String> attributeList = new ArrayList<>();
         String className = getClassName();
-
-        List<String> keys = this.classAttributes.get(className);
+        List<String> keys;
+        if(this.classAttributes.containsKey(className)) {
+            keys = this.classAttributes.get(className);
+        }
+        else {
+            return null;
+        }
+        
         for (String key : keys) {
             String s = "";
             String visibility = this.attributeVisibility.get(key);
@@ -293,8 +306,17 @@ public class UMLModel {
     public List<String> getMethodInfo() {
         ArrayList<String> methodList = new ArrayList<>();
         String className = getClassName();
-
-        List<String> keys = this.classMethods.get(className);
+        String interfaceName = getInterfaceName();
+        List<String> keys;
+        if(this.classMethods.containsKey(className)) {
+            keys = this.classMethods.get(className);
+        } else if (this.classMethods.containsKey(interfaceName)) {
+            keys = this.classMethods.get(interfaceName);
+        }
+        else {
+            return null;
+        }
+    
         for (String key : keys) {
             String s = "";
             String methodName = key;

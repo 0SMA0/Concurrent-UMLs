@@ -125,76 +125,66 @@ public class FileParser implements Runnable {
         }
     }
 
-    private boolean looksLikeMethodStart(String line) {
-        return line.matches(".*\\)\\s*\\{?$") && !line.contains("class") && !line.contains("interface");
-    }
-
-    private int countChar(String line, char ch) {
-        int count = 0;
-        for (char c : line.toCharArray()) {
-            if (c == ch)
-                count++;
-        }
-        return count;
-    }
-
     @Override
     public void run() {
+
+        // if we take into account that it will always end up on the odd value and if we
+        // check that it is completed
+
         try {
             List<String> lines = Files.readAllLines(new File(filePath).toPath());
 
-            boolean collectingMethod = false;
-            StringBuilder methodBuffer = new StringBuilder();
-            int braceDepth = 0;
-            boolean inMethodBody = false;
+            int startBraceCount = 0;
+            int endBraceCount = 0;
+            int totalCount = 0;
+            boolean startBrace = false;
+            boolean endBrace = false;
+            boolean completed = (startBrace == endBrace) ? true : false;
+
+            boolean classStartBrace = false;
+            boolean classEndBrace = false;
+            boolean inMethod = false;
+            int differenceBraceCount = 0;
 
             for (String line : lines) {
-                String trimmed = line.trim();
-
-                parseClassInterfaceAbstractName(trimmed); // still always do this
-
-                // Start collecting a method if we see a method-like pattern and not already
-                // inside one
-                if (!inMethodBody && !collectingMethod && looksLikeMethodStart(trimmed)) {
-                    collectingMethod = true;
-                    methodBuffer.append(trimmed).append(" ");
-                    if (trimmed.contains("{")) {
-                        inMethodBody = true;
-                        braceDepth = 1;
-                        parseMethods(methodBuffer.toString());
-                        collectingMethod = false;
-                        methodBuffer.setLength(0);
-                    }
+                line = line.trim();
+                if (line.startsWith("//"))
                     continue;
-                }
 
-                // Continue collecting multiline method signature
-                if (collectingMethod) {
-                    methodBuffer.append(trimmed).append(" ");
-                    if (trimmed.contains("{")) {
-                        inMethodBody = true;
-                        braceDepth = 1;
-                        parseMethods(methodBuffer.toString());
-                        collectingMethod = false;
-                        methodBuffer.setLength(0);
+                parseClassInterfaceAbstractName(line);
+                if (line.contains("{")) {
+                    startBraceCount++;
+                    // first brace will the class brace
+                    if (startBraceCount == 1) {
+                        classStartBrace = true;
+                    } else {
+                        startBrace = true;
                     }
-                    continue;
                 }
-
-                // If inside method body, track braces and skip everything else
-                if (inMethodBody) {
-                    braceDepth += countChar(trimmed, '{');
-                    braceDepth -= countChar(trimmed, '}');
-                    if (braceDepth <= 0) {
-                        inMethodBody = false;
-                    }
-                    continue;
+                if (line.contains("}")) {
+                    endBrace = true;
+                    endBraceCount++;
                 }
-
-                // Outside method — parse attributes
-                parseAttributeInfo(trimmed);
+                parseClassInterfaceAbstractName(line);
+                if(differenceBraceCount == 1 ) {
+                    parseAttributeInfo(line);
+                }
+                differenceBraceCount = startBraceCount - endBraceCount;
+                
+                // if (completed && (totalCount % 2 != 0) && !line.isEmpty()) {
+                //     System.out.println("Start Count: " + startBraceCount);
+                //     System.out.println("Ending Count: " + endBraceCount);
+                //     System.out.println("Total Count: " + totalCount);
+                //     System.out.println("Completed: " + line);
+                //     parseAttributeInfo(line);
+                // }
+                if(differenceBraceCount == 2) {
+                    parseMethods(line);
+                }
+                totalCount = startBraceCount + endBraceCount;
             }
-
+            // System.out.println("Start: " + startBraceCount);
+            // System.out.println("End: " + endBraceCount);
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }
@@ -202,7 +192,8 @@ public class FileParser implements Runnable {
 
     public static void main(String[] args) {
         UMLModel model = new UMLModel();
-        FileParser parser = new FileParser("src//UMLModel.java", model);
+        FileParser parser = new FileParser("src//TestingFiles//Animal.java", model);
+        // FileParser parser = new FileParser("src//TestFile.java", model);
         // FileParser parser2 = new FileParser("src\\UMLModel.java", new UMLModel());
         Thread thread = new Thread(parser);
         thread.start();

@@ -16,18 +16,26 @@ public class PlantUmlGenerator {
         uml.append("hide circle \n");
 
         String className = this.umlModel.getClassName();
+        if(className == "") {
+            className = this.umlModel.getInterfaceName();
+        }
 
         uml.append("class ").append(className).append(" {\n");
         List<String> attributeInfo = this.umlModel.getAttributesInfo();
 
-        for (String string : attributeInfo) {
-            uml.append(string + "\n");
+        if(attributeInfo != null) {
+            for (String string : attributeInfo) {
+                uml.append(string + "\n");
+            }
         }
 
         List<String> methodInfo = this.umlModel.getMethodInfo();
 
-        for (String string : methodInfo) {
-            uml.append(string + "\n");
+        
+        if(methodInfo != null) {
+            for (String string : methodInfo) {
+                uml.append(string + "\n");
+            }
         }
 
         uml.append("}\n").append("@enduml");

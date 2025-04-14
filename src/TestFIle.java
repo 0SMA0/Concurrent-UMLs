@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestFIle {
+public class TestFIle {                             //start count brace is 1, but we ignore it
     int z;              //package private
     String e;           //package private
     private int x = 5; // Visibility + Type + Name  
@@ -14,13 +14,17 @@ public class TestFIle {
 
     // didn't account for methods with the same name, but diff params
 
-    public TestFIle(String e){
-        this.e = e;
-    }
+    public TestFIle(String e){                      //start count brace is 2           //diff: 2
+        if(e == "2") {                              //start count brace is 3           //diff: 3
+            this.e = e;                              
+        }                                           //ending brace is 1                 //diff: 2
+    }                                               //ending brace is now 2             //diff: 1 (CAN PARSE FOR ATTRIBUTES)
 
-    public final int getZ() {
+    public final int getZ() {                       //start count is 4                  //diff: 2
+        String rando = "ee";
         return z;
-    }
+    }                                               //ending brace is 3                 //diff: 1 (CAN PARSE FOR ATTRIBUTES)
+    
     public String getE() {
         return e;
     }
@@ -36,11 +40,14 @@ public class TestFIle {
     public static String getS() {
         return s;
     }
+
+    public int numbe;
+
     public void setS(String s, int one) {
 
     }
 
 
-    
+    public String rando;
 
 }
