@@ -257,45 +257,54 @@ public class UMLModel {
     }
 
     public List<String> getAttributesInfo() {
+        boolean isInterface = false;
         List<String> attributeList = new ArrayList<>();
         String className = getClassName();
+        if (className == "") {
+            className = getInterfaceName();
+        }
         List<String> keys;
+
         if (this.classAttributes.containsKey(className)) {
             keys = this.classAttributes.get(className);
         } else {
+            isInterface = true;
             return null;
         }
 
-        for (String key : keys) {
-            String s = "";
-            String visibility = this.attributeVisibility.get(key);
-            String symbol = convertVisibilityToSymbol(visibility);
-            String returnType = this.attributeReturnTypes.get(className).get(key);
-            boolean isFinal = false;
-            if (this.attributeFinal.containsKey(className)) {
-                isFinal = this.attributeFinal.get(className).containsKey(key);
-            }
-            s += symbol;
-            if (this.attributeStatic.containsKey(className)) {
-                boolean isStatic = this.attributeStatic.get(className).containsKey(key);
-                if (isStatic) {
-                    s += "{static}";
-                }
-            }
-            String attributeName = key;
-            s += attributeName + " : ";
-            s += returnType;
-            if (this.attributeInitialValues.containsKey(className)) {
-                boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
-                if (hasInitial) {
-                    s += " " + this.attributeInitialValues.get(className).get(key);
-                }
+        if (isInterface) {
 
+            for (String key : keys) {
+                String s = "";
+                String visibility = this.attributeVisibility.get(key);
+                String symbol = convertVisibilityToSymbol(visibility);
+                String returnType = this.attributeReturnTypes.get(className).get(key);
+                boolean isFinal = false;
+                if (this.attributeFinal.containsKey(className)) {
+                    isFinal = this.attributeFinal.get(className).containsKey(key);
+                }
+                s += symbol;
+                if (this.attributeStatic.containsKey(className)) {
+                    boolean isStatic = this.attributeStatic.get(className).containsKey(key);
+                    if (isStatic) {
+                        s += "{static}";
+                    }
+                }
+                String attributeName = key;
+                s += attributeName + " : ";
+                s += returnType;
+                if (this.attributeInitialValues.containsKey(className)) {
+                    boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
+                    if (hasInitial) {
+                        s += " " + this.attributeInitialValues.get(className).get(key);
+                    }
+
+                }
+                if (isFinal) {
+                    attributeName = key.toUpperCase();
+                }
+                attributeList.add(s);
             }
-            if (isFinal) {
-                attributeName = key.toUpperCase();
-            }
-            attributeList.add(s);
         }
         return attributeList;
     }
@@ -385,8 +394,10 @@ public class UMLModel {
                 s += symbol;
 
                 // need to change param to __ : ___
-                if(params != ""){
-                    s += "{abstract}" + methodName + "(" + params + ")" +" : " + returnType;
+                if (params != "") {
+                    String[] placeholder = params.split(" ");
+                    s += "{abstract}" + methodName + "(" + placeholder[0] + " : " + placeholder[1] + ")" + " : "
+                            + returnType;
                 } else {
                     s += "{abstract}" + methodName + "() : " + returnType;
 
