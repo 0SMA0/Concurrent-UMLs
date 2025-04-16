@@ -234,20 +234,21 @@ public class FileParser implements Runnable {
     }
 
     public static void main(String[] args) {
-        UMLModel model = new UMLModel();
-        FileParser parser = new FileParser("src//TestingFiles//Animal.java", model);
-        // FileParser parser2 = new FileParser("src//TestFile.java", model);
+        // UMLModel model = new UMLModel();
+        FileParser parser = new FileParser("src//TestingFiles//Dog.java", new UMLModel());
+        FileParser parser2 = new FileParser("src//TestFile.java", new UMLModel());
         // FileParser parser2 = new FileParser("src\\UMLModel.java", new UMLModel());
         Thread thread = new Thread(parser);
         thread.start();
-        // Thread thread2 = new Thread(parser2);
-        // thread2.start();
-        PlantUmlGenerator gene = new PlantUmlGenerator(model);
+        Thread thread2 = new Thread(parser2);
+        thread2.start();
         try {
             // Wait for the parser thread to finish
+            PlantUmlGenerator gene = new PlantUmlGenerator(parser.umlModel);
             thread.join();
-            // gene.generateToFile("output.puml");
-            // thread2.join();
+            gene.generateToFile("output.puml");
+            thread2.join();
+            gene.setUML(parser2.umlModel);
             gene.generateToFile("output.puml");
 
 

@@ -1,10 +1,14 @@
 import java.util.List;
 
 public class PlantUmlGenerator {
-    public final UMLModel umlModel;
+    public UMLModel umlModel;
     
 
     public PlantUmlGenerator (UMLModel umlModel) {
+        this.umlModel = umlModel;
+    }
+
+    public void setUML(UMLModel umlModel) {
         this.umlModel = umlModel;
     }
 

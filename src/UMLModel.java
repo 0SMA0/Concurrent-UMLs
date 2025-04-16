@@ -257,7 +257,7 @@ public class UMLModel {
     }
 
     public List<String> getAttributesInfo() {
-        boolean isInterface = false;
+        boolean isClass = false;
         List<String> attributeList = new ArrayList<>();
         String className = getClassName();
         if (className == "") {
@@ -268,12 +268,11 @@ public class UMLModel {
         if (this.classAttributes.containsKey(className)) {
             keys = this.classAttributes.get(className);
         } else {
-            isInterface = true;
+            isClass = true;
             return null;
         }
-
-        if (isInterface) {
-
+        
+        if (!isClass) {
             for (String key : keys) {
                 String s = "";
                 String visibility = this.attributeVisibility.get(key);
