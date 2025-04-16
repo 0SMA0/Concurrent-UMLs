@@ -19,7 +19,13 @@ public class Cat implements Animal {
 
     @Override
     public void eating(String e) {
-        
+        if(e == "2") {
+            System.out.println("ewq");
+        }
+        int x=3;
+        while(x == 2) {
+            System.out.println("ee");
+        }
     }
     
     public void scratch() {

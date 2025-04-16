@@ -22,13 +22,14 @@ public class FileParser implements Runnable {
             .compile("^\\s*(?:public\\s+)?abstract\\s+class\\s+([a-zA-Z_][a-zA-Z0-9_]*)", Pattern.MULTILINE);
 
     private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(
-            "^\\s*(public|private|protected)?\\s*" + // Group 1: visibility
-                    "(static)?\\s*" + // Group 2: static keyword (optional)
-                    "(final)?\\s*" + // Group 3: final keyword (optional)
-                    "([\\w<>\\[\\]]+)\\s+" + // Group 4: return/type
+            "^\\s*(public|private|protected)?\\s*" + // Group 1: visibility (optional)
+                    "(static)?\\s*" + // Group 2: static (optional)
+                    "(final)?\\s*" + // Group 3: final (optional)
+                    "([\\w\\.]+(?:<[^>]+>)?(?:\\[\\])?)\\s+" + // Group 4: return type
                     "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" + // Group 5: attribute name
                     "(=\\s*[^;]+)?;" // Group 6: assignment (optional)
     );
+
     private static final Pattern INTERFACE_METHOD_PATTERN = Pattern.compile(
             "^\\s*(public\\s+)?(static\\s+)?(default\\s+)?([\\w<>\\[\\]]+)\\s+" + // return type
                     "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" + // method name
@@ -111,26 +112,25 @@ public class FileParser implements Runnable {
 
             // Interface methods are by default abstract and public
             String visibility = "public";
-            
+
             // Interface attributes are by default public, static and final
             String[] stuff = line.split(" ", 2);
-            
+
             String returnType = "";
             String methodName = "";
-            if(stuff[0] != "public") {
+            if (stuff[0] != "public") {
                 returnType = stuff[0];
             }
             String params = "";
-            
-            for(int i =0 ; i<stuff.length; i++) {
-                if(stuff[i].contains("(")) {
+
+            for (int i = 0; i < stuff.length; i++) {
+                if (stuff[i].contains("(")) {
                     int parStartIndex = stuff[i].indexOf("(");
                     int parEndIndex = stuff[i].indexOf(")");
                     methodName = stuff[i].substring(0, parStartIndex);
                     int diffIndex = parEndIndex - parStartIndex;
-                    if(diffIndex != 1) 
-                    {
-                        params = stuff[i].substring(parStartIndex+1, parEndIndex);
+                    if (diffIndex != 1) {
+                        params = stuff[i].substring(parStartIndex + 1, parEndIndex);
                     }
                 }
             }
@@ -152,7 +152,7 @@ public class FileParser implements Runnable {
             if (visibility == null) {
                 visibility = "package-private";
             }
-            
+
             // Taking into account for the constructor
             if (returnType == null || methodName.equals(this.className)) {
                 // Constructor
@@ -237,11 +237,19 @@ public class FileParser implements Runnable {
         // UMLModel model = new UMLModel();
         FileParser parser = new FileParser("src//TestingFiles//Dog.java", new UMLModel());
         FileParser parser2 = new FileParser("src//TestFile.java", new UMLModel());
-        // FileParser parser2 = new FileParser("src\\UMLModel.java", new UMLModel());
+        FileParser parser3 = new FileParser("src//TestingFiles//Animal.java", new UMLModel());
+        FileParser parser4 = new FileParser("src//TestingFiles//Cat.java", new UMLModel());
         Thread thread = new Thread(parser);
         thread.start();
         Thread thread2 = new Thread(parser2);
+        Thread thread3 = new Thread(parser3);
+        thread3.start();
+        Thread thread4 = new Thread(parser4);
         thread2.start();
+        thread4.start();
+        FileParser md = new FileParser("src//UMLModel.java", new UMLModel());
+        Thread mdt = new Thread(md);
+        mdt.start();
         try {
             // Wait for the parser thread to finish
             PlantUmlGenerator gene = new PlantUmlGenerator(parser.umlModel);
@@ -250,7 +258,15 @@ public class FileParser implements Runnable {
             thread2.join();
             gene.setUML(parser2.umlModel);
             gene.generateToFile("output.puml");
-
+            thread4.join();
+            gene.setUML(parser4.umlModel);
+            gene.generateToFile("output.puml");
+            thread3.join();
+            gene.setUML(parser3.umlModel);
+            gene.generateToFile("output.puml");
+            mdt.join();
+            gene.setUML(md.umlModel);
+            gene.generateToFile("output.puml");
 
         } catch (InterruptedException e) {
             System.err.println("Thread interrupted: " + e);
