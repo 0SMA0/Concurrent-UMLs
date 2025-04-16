@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,6 +11,7 @@ public class FileParser implements Runnable {
     private final String filePath;
     private final UMLModel umlModel;
     private String className;
+    private boolean isClass = true;
 
     // Patterns
     private static final Pattern CLASS_PATTERN = Pattern
@@ -26,6 +28,11 @@ public class FileParser implements Runnable {
                     "([\\w<>\\[\\]]+)\\s+" + // Group 4: return/type
                     "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" + // Group 5: attribute name
                     "(=\\s*[^;]+)?;" // Group 6: assignment (optional)
+    );
+    private static final Pattern INTERFACE_METHOD_PATTERN = Pattern.compile(
+            "^\\s*(public\\s+)?(static\\s+)?(default\\s+)?([\\w<>\\[\\]]+)\\s+" + // return type
+                    "([a-zA-Z_][a-zA-Z0-9_]*)\\s*" + // method name
+                    "\\(([^)]*)\\)\\s*;" // parameters
     );
 
     private static final Pattern METHOD_PATTERN = Pattern.compile(
@@ -44,6 +51,10 @@ public class FileParser implements Runnable {
         return this.className;
     }
 
+    private void setIsClass(boolean truth) {
+        this.isClass = truth;
+    }
+
     private void parseClassInterfaceAbstractName(String line) {
         Matcher classMatcher = CLASS_PATTERN.matcher(line);
         Matcher interfaceMatcher = INTERFACE_PATTERN.matcher(line);
@@ -56,6 +67,8 @@ public class FileParser implements Runnable {
         } else if (interfaceMatcher.find()) {
             String interfaceName = interfaceMatcher.group(1);
             setClassName(interfaceName);
+            setIsClass(false);
+
             umlModel.addInterface(interfaceName);
         } else if (abstractMatcher.find()) {
             String abstractName = abstractMatcher.group(1);
@@ -91,8 +104,43 @@ public class FileParser implements Runnable {
 
     private void parseMethods(String line) {
         Matcher methodMatcher = METHOD_PATTERN.matcher(line);
+        Matcher interfaceMethod = INTERFACE_METHOD_PATTERN.matcher(line);
+        if (interfaceMethod.find() && !isClass) {
+            // System.out.println("entered");
+            // System.out.println(line);
 
-        if (methodMatcher.find()) {
+            // Interface methods are by default abstract and public
+            String visibility = "public";
+            
+            // Interface attributes are by default public, static and final
+            String[] stuff = line.split(" ", 2);
+            
+            String returnType = "";
+            String methodName = "";
+            if(stuff[0] != "public") {
+                returnType = stuff[0];
+            }
+            String params = "";
+            
+            for(int i =0 ; i<stuff.length; i++) {
+                if(stuff[i].contains("(")) {
+                    int parStartIndex = stuff[i].indexOf("(");
+                    int parEndIndex = stuff[i].indexOf(")");
+                    methodName = stuff[i].substring(0, parStartIndex);
+                    int diffIndex = parEndIndex - parStartIndex;
+                    if(diffIndex != 1) 
+                    {
+                        params = stuff[i].substring(parStartIndex+1, parEndIndex);
+                    }
+                }
+            }
+            // System.out.println(params);
+            umlModel.addMethod(this.className, methodName);
+            umlModel.addMethodVisibility(methodName, visibility);
+            umlModel.addMethodParams(this.className, methodName, params);
+            umlModel.addMethodReturnType(this.className, methodName, returnType);
+
+        } else if (methodMatcher.find()) {
             String visibility = methodMatcher.group(1);
             Boolean isStatic = "static".equals(methodMatcher.group(2)) ? true : null;
             Boolean isFinal = "final".equals(methodMatcher.group(3)) ? true : null;
@@ -104,7 +152,7 @@ public class FileParser implements Runnable {
             if (visibility == null) {
                 visibility = "package-private";
             }
-
+            
             // Taking into account for the constructor
             if (returnType == null || methodName.equals(this.className)) {
                 // Constructor
@@ -166,25 +214,20 @@ public class FileParser implements Runnable {
                     endBraceCount++;
                 }
                 parseClassInterfaceAbstractName(line);
-                if(differenceBraceCount == 1 ) {
+                if (differenceBraceCount == 1) {
                     parseAttributeInfo(line);
                 }
                 differenceBraceCount = startBraceCount - endBraceCount;
-                
-                // if (completed && (totalCount % 2 != 0) && !line.isEmpty()) {
-                //     System.out.println("Start Count: " + startBraceCount);
-                //     System.out.println("Ending Count: " + endBraceCount);
-                //     System.out.println("Total Count: " + totalCount);
-                //     System.out.println("Completed: " + line);
-                //     parseAttributeInfo(line);
-                // }
-                if(differenceBraceCount == 2) {
+
+                if (differenceBraceCount == 2 && this.isClass) {
+                    parseMethods(line);
+                }
+
+                else if (differenceBraceCount == 1 && !this.isClass) {
                     parseMethods(line);
                 }
                 totalCount = startBraceCount + endBraceCount;
             }
-            // System.out.println("Start: " + startBraceCount);
-            // System.out.println("End: " + endBraceCount);
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }

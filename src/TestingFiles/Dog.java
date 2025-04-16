@@ -17,6 +17,11 @@ public class Dog implements Animal {
         System.out.println(name + " is eating.");
     }
 
+    @Override
+    public void eating(String e) {
+        
+    }
+
     public void fetch() {
         System.out.println(name + " is fetching the ball!");
     }

@@ -17,6 +17,11 @@ public class Cat implements Animal {
         System.out.println(name + " is eating.");
     }
 
+    @Override
+    public void eating(String e) {
+        
+    }
+    
     public void scratch() {
         System.out.println(name + " is scratching the post!");
     }

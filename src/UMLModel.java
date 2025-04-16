@@ -236,8 +236,6 @@ public class UMLModel {
     public String getInterfaceName() {
         return this.interfaceNames.toString().replace("[", "").replace("]", "");
     }
-    
-
 
     public String convertVisibilityToSymbol(String visibility) {
         String symbol = "";
@@ -262,20 +260,19 @@ public class UMLModel {
         List<String> attributeList = new ArrayList<>();
         String className = getClassName();
         List<String> keys;
-        if(this.classAttributes.containsKey(className)) {
+        if (this.classAttributes.containsKey(className)) {
             keys = this.classAttributes.get(className);
-        }
-        else {
+        } else {
             return null;
         }
-        
+
         for (String key : keys) {
             String s = "";
             String visibility = this.attributeVisibility.get(key);
             String symbol = convertVisibilityToSymbol(visibility);
             String returnType = this.attributeReturnTypes.get(className).get(key);
             boolean isFinal = false;
-            if(this.attributeFinal.containsKey(className)) {
+            if (this.attributeFinal.containsKey(className)) {
                 isFinal = this.attributeFinal.get(className).containsKey(key);
             }
             s += symbol;
@@ -288,7 +285,7 @@ public class UMLModel {
             String attributeName = key;
             s += attributeName + " : ";
             s += returnType;
-            if(this.attributeInitialValues.containsKey(className)) {
+            if (this.attributeInitialValues.containsKey(className)) {
                 boolean hasInitial = this.attributeInitialValues.get(className).containsKey(key);
                 if (hasInitial) {
                     s += " " + this.attributeInitialValues.get(className).get(key);
@@ -304,74 +301,99 @@ public class UMLModel {
     }
 
     public List<String> getMethodInfo() {
+        boolean isInterface = false;
         ArrayList<String> methodList = new ArrayList<>();
         String className = getClassName();
         String interfaceName = getInterfaceName();
         List<String> keys;
-        if(this.classMethods.containsKey(className)) {
+
+        if (this.classMethods.containsKey(className)) {
             keys = this.classMethods.get(className);
         } else if (this.classMethods.containsKey(interfaceName)) {
             keys = this.classMethods.get(interfaceName);
-        }
-        else {
+            isInterface = true;
+        } else {
             return null;
         }
-    
-        for (String key : keys) {
-            String s = "";
-            String methodName = key;
-            String visibility = this.methodVisibility.get(key);
-            String symbol = convertVisibilityToSymbol(visibility);
-            if (methodName.equals(className)) {
-                s += "<<create>> ";
-            }
-            s += symbol;
-            if (this.methodFinal.containsKey(className)) {
-                boolean isFinal = this.methodFinal.get(className).containsKey(key);
-                if (isFinal) {
-                    methodName = key.toUpperCase();
+        if (!isInterface) {
+            for (String key : keys) {
+                String s = "";
+                String methodName = key;
+                String visibility = this.methodVisibility.get(key);
+                String symbol = convertVisibilityToSymbol(visibility);
+                if (methodName.equals(className)) {
+                    s += "<<create>> ";
                 }
-            }
-            if (this.methodStatic.containsKey(className)) {
-                boolean isStatic = this.methodStatic.get(className).containsKey(key);
-                if (isStatic) {
-                    s += "{static}";
+                s += symbol;
+                if (this.methodFinal.containsKey(className)) {
+                    boolean isFinal = this.methodFinal.get(className).containsKey(key);
+                    if (isFinal) {
+                        methodName = key.toUpperCase();
+                    }
                 }
-            }
-            String params = this.methodParams.get(className).get(key);
-            String[] split = params.split(",");
-            
-            ArrayList<String> paramsList = new ArrayList<>();
-            if (split[0] != "") {
-                if (split.length > 1) {
-                    for (int i = 0; i < split.length; i++) {
+                if (this.methodStatic.containsKey(className)) {
+                    boolean isStatic = this.methodStatic.get(className).containsKey(key);
+                    if (isStatic) {
+                        s += "{static}";
+                    }
+                }
+                String params = this.methodParams.get(className).get(key);
+                String[] split = params.split(",");
+
+                ArrayList<String> paramsList = new ArrayList<>();
+                if (split[0] != "") {
+                    if (split.length > 1) {
+                        for (int i = 0; i < split.length; i++) {
+                            String paramFormated = "";
+                            String[] whole = split[i].trim().split(" ");
+                            String paramReturnType = whole[0];
+                            String paramName = whole[1];
+                            paramFormated += paramName + ": " + paramReturnType;
+                            paramsList.add(paramFormated);
+                        }
+                    } else if (split.length == 1) {
+                        String whole = split[0];
+                        String[] singleSplit = whole.split(" ");
                         String paramFormated = "";
-                        String[] whole = split[i].trim().split(" ");
-                        String paramReturnType = whole[0];
-                        String paramName = whole[1];
+                        String paramReturnType = singleSplit[0];
+                        String paramName = singleSplit[singleSplit.length - 1];
                         paramFormated += paramName + ": " + paramReturnType;
                         paramsList.add(paramFormated);
                     }
-                } else if(split.length == 1) {
-                    String whole = split[0];
-                    String [] singleSplit = whole.split(" ");
-                    String paramFormated = "";
-                    String paramReturnType = singleSplit[0];
-                    String paramName = singleSplit[singleSplit.length-1];
-                    paramFormated += paramName + ": " + paramReturnType;
-                    paramsList.add(paramFormated);
                 }
-            }
-            String formatedParamList = paramsList.toString().replace("[", "(").replace("]", ")");
-            
-            s += methodName + formatedParamList;
-            Boolean hasReturn;
-            if (this.methodReturnTypes.containsKey(className)) {
-                hasReturn = this.methodReturnTypes.get(className).containsKey(key);
-                if (hasReturn) s += " : "+this.methodReturnTypes.get(className).get(key);
-            }
+                String formatedParamList = paramsList.toString().replace("[", "(").replace("]", ")");
 
-            methodList.add(s);
+                s += methodName + formatedParamList;
+                Boolean hasReturn;
+                if (this.methodReturnTypes.containsKey(className)) {
+                    hasReturn = this.methodReturnTypes.get(className).containsKey(key);
+                    if (hasReturn)
+                        s += " : " + this.methodReturnTypes.get(className).get(key);
+                }
+
+                methodList.add(s);
+            }
+        } else {
+            // Interface methods are by default abstract and public
+            for (String key : keys) {
+                String s = "";
+                String methodName = key;
+                String visiblity = this.methodVisibility.get(key);
+                String symbol = convertVisibilityToSymbol(visiblity);
+                String params = this.methodParams.get(interfaceName).get(key);
+                String returnType = this.methodReturnTypes.get(interfaceName).get(key);
+                s += symbol;
+
+                // need to change param to __ : ___
+                if(params != ""){
+                    s += "{abstract}" + methodName + "(" + params + ")" +" : " + returnType;
+                } else {
+                    s += "{abstract}" + methodName + "() : " + returnType;
+
+                }
+
+                methodList.add(s);
+            }
         }
 
         return methodList;
@@ -403,6 +425,5 @@ public class UMLModel {
 
         return s;
     }
-
 
 }

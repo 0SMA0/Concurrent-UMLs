@@ -9,18 +9,21 @@ public class PlantUmlGenerator {
     }
 
     public synchronized void generateToFile(String fileName) {
+        String className = this.umlModel.getClassName();
+        
         StringBuilder uml = new StringBuilder();
 
         uml.append("@startuml\n");
         uml.append("skinparam classAttributeIconSize 0\n");
         uml.append("hide circle \n");
-
-        String className = this.umlModel.getClassName();
+        
         if(className == "") {
             className = this.umlModel.getInterfaceName();
+            uml.append("interface ").append(className).append(" {\n");
+        } else {
+            uml.append("class ").append(className).append(" {\n");
         }
 
-        uml.append("class ").append(className).append(" {\n");
         List<String> attributeInfo = this.umlModel.getAttributesInfo();
 
         if(attributeInfo != null) {
