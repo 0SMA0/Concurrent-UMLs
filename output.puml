@@ -10,35 +10,6 @@ interface Animal {
 @startuml
 skinparam classAttributeIconSize 0
 hide circle 
-class TestFIle {
-~z : int
-~e : String
--x : int = 5
-~{static}name : String = "A"
-~y : double = 1
-+{static}s : String = "s"
-#thing : String
--sam : String = "sam"
-+hehe : List<String> = new ArrayList<>
--cat : Cat
--dog : Dog
-+numbe : int
-+rando : String
-<<create>> +TestFIle(e: String)
-+GETZ(e: Dog) : int
-+getE() : String
-+getX() : int
-+{static}getName() : String
-+getY() : double
-+{static}getS() : String
-+setS(s: String, one: int) : void
-}
-@enduml
-TestFIle --> Cat
-TestFIle --> Dog
-@startuml
-skinparam classAttributeIconSize 0
-hide circle 
 class Cat {
 -name : String
 <<create>> +Cat(name: String)

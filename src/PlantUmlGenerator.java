@@ -1,11 +1,9 @@
-import java.util.HashSet;
 import java.util.List;
 
 public class PlantUmlGenerator {
     public UMLModel umlModel;
     public StringBuilder current;
     public String past;
-    private HashSet<String> pastClassNames = new HashSet<>();
     public StringBuilder allCurrents = new StringBuilder();
     
     public PlantUmlGenerator (UMLModel umlModel) {
