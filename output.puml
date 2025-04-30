@@ -1,0 +1,65 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+interface Animal {
++{abstract}makeSound() : void
++{abstract}eat() : void
++{abstract}eating(String : e) : void
+}
+@enduml
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class TestFIle {
+~z : int
+~e : String
+-x : int = 5
+~{static}name : String = "A"
+~y : double = 1
++{static}s : String = "s"
+#thing : String
+-sam : String = "sam"
++hehe : List<String> = new ArrayList<>
+-cat : Cat
+-dog : Dog
++numbe : int
++rando : String
+<<create>> +TestFIle(e: String)
++GETZ(e: Dog) : int
++getE() : String
++getX() : int
++{static}getName() : String
++getY() : double
++{static}getS() : String
++setS(s: String, one: int) : void
+}
+@enduml
+TestFIle --> Cat
+TestFIle --> Dog
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class Cat {
+-name : String
+<<create>> +Cat(name: String)
++makeSound() : void
++eat() : void
++eating(e: String) : void
++scratch() : void
+}
+@enduml
+Cat ..|> Animal
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class Dog {
+-name : String
+<<create>> +Dog(name: String)
++makeSound() : void
++eat() : void
++eating(e: String) : void
++fetch() : void
+}
+@enduml
+Dog ..|> Animal
+

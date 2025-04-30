@@ -2,3 +2,58 @@ Added to UML Class: TestFIle
 UML MODEL: 
 Methods: [<<create>> +TestFIle(e: String), +GETZ(), +getE(), +getX(), +{static}getName(), +getY(), +{static}getS(), +setS(s: String, one: int)]
 Attribute: [~z : int, ~e : String, -x : int = 5, ~{static}name : String = "A", ~Y : double = 1, +{static}S : String = "s", #thing : String, -SAM : String = "sam", +hehe : List<String> = new ArrayList<>()]
+
+
+Current Output now:
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+class TestFIle {
+~z : int
+~e : String
+-x : int = 5
+~{static}name : String = "A"
+~y : double = 1
++{static}s : String = "s"
+#thing : String
+-sam : String = "sam"
++hehe : List<String> = new ArrayList<>
++numbe : int
++rando : String
+<<create>> +TestFIle(e: String)
++GETZ() : int
++getE() : String
++getX() : int
++{static}getName() : String
++getY() : double
++{static}getS() : String
++setS(s: String, one: int) : void
+}
+@enduml@startuml
+skinparam classAttributeIconSize 0
+hide circle
+class Cat {
+-name : String
+<<create>> +Cat(name: String)
++makeSound() : void
++eat() : void
++eating(e: String) : void
++scratch() : void
+}
+@enduml@startuml
+skinparam classAttributeIconSize 0
+hide circle
+interface Animal {
++{abstract}makeSound() : void
++{abstract}eat() : void
++{abstract}eating(String : e) : void
+}
+@enduml@startuml
+skinparam classAttributeIconSize 0
+hide circle
+interface Animal2 {
++{abstract}makeSound() : void
++{abstract}eat() : void
++{abstract}eating(String : e) : void
+}
+@enduml

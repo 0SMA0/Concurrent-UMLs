@@ -1,7 +1,6 @@
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -9,7 +8,7 @@ import java.util.regex.Pattern;
 public class FileParser implements Runnable {
 
     private final String filePath;
-    private final UMLModel umlModel;
+    private UMLModel umlModel;
     private String className;
     private boolean isClass = true;
 
@@ -65,16 +64,18 @@ public class FileParser implements Runnable {
             String className = classMatcher.group(1);
             setClassName(className);
             umlModel.addClass(className);
+            umlModel.getDependenciesModel().analyzeClassDeclaration(className, line);
         } else if (interfaceMatcher.find()) {
             String interfaceName = interfaceMatcher.group(1);
             setClassName(interfaceName);
             setIsClass(false);
-
+            umlModel.getDependenciesModel().analyzeClassDeclaration(interfaceName, line);
             umlModel.addInterface(interfaceName);
         } else if (abstractMatcher.find()) {
             String abstractName = abstractMatcher.group(1);
             setClassName(abstractName);
             umlModel.addAbstract(abstractName);
+            umlModel.getDependenciesModel().analyzeClassDeclaration(abstractName, line);
         }
     }
 
@@ -173,6 +174,7 @@ public class FileParser implements Runnable {
         }
     }
 
+
     @Override
     public void run() {
 
@@ -227,50 +229,44 @@ public class FileParser implements Runnable {
                     parseMethods(line);
                 }
                 totalCount = startBraceCount + endBraceCount;
+
+                // When parsing class declaration:
+
+                umlModel.getDependenciesModel().analyzeFieldDependencies(umlModel);
+                umlModel.getDependenciesModel().analyzeMethodDependencies(umlModel);
             }
         } catch (IOException e) {
             System.err.println("Error parsing file: " + e);
         }
     }
 
-    public static void main(String[] args) {
-        // UMLModel model = new UMLModel();
-        FileParser parser = new FileParser("src//TestingFiles//Dog.java", new UMLModel());
-        FileParser parser2 = new FileParser("src//TestFile.java", new UMLModel());
-        FileParser parser3 = new FileParser("src//TestingFiles//Animal.java", new UMLModel());
-        FileParser parser4 = new FileParser("src//TestingFiles//Cat.java", new UMLModel());
+    
+    private static void processFile(String filePath, PlantUmlGenerator gene) {
+        UMLModel model = new UMLModel();
+        FileParser parser = new FileParser(filePath, model);
+        gene.setUML(model);
+        
         Thread thread = new Thread(parser);
-        thread.start();
-        Thread thread2 = new Thread(parser2);
-        Thread thread3 = new Thread(parser3);
-        thread3.start();
-        Thread thread4 = new Thread(parser4);
-        thread2.start();
-        thread4.start();
-        FileParser md = new FileParser("src//UMLModel.java", new UMLModel());
-        Thread mdt = new Thread(md);
-        mdt.start();
         try {
-            // Wait for the parser thread to finish
-            PlantUmlGenerator gene = new PlantUmlGenerator(parser.umlModel);
+            thread.start();
             thread.join();
-            gene.generateToFile("output.puml");
-            thread2.join();
-            gene.setUML(parser2.umlModel);
-            gene.generateToFile("output.puml");
-            thread4.join();
-            gene.setUML(parser4.umlModel);
-            gene.generateToFile("output.puml");
-            thread3.join();
-            gene.setUML(parser3.umlModel);
-            gene.generateToFile("output.puml");
-            mdt.join();
-            gene.setUML(md.umlModel);
-            gene.generateToFile("output.puml");
-
+            gene.genSingleClass();
         } catch (InterruptedException e) {
             System.err.println("Thread interrupted: " + e);
         }
+    }
+    public static void main(String[] args) {
+        UMLModel model = new UMLModel();
+        PlantUmlGenerator gene = new PlantUmlGenerator(model);
+
+        // Process each file separately with a fresh model
+        processFile("src//TestFIle.java", gene);
+        processFile("src//TestingFiles//Dog.java", gene);
+        processFile("src//TestingFiles//Cat.java", gene);
+        processFile("src//TestingFiles//Animal.java", gene);
+        processFile("src//TestingFiles//Animal2.java", gene);
+
+        System.out.println(gene.putItAllTogether());
     }
 
 }

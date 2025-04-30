@@ -1,3 +1,4 @@
+package TestingFiles;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,8 @@ public class TestFIle {                             //start count brace is 1, bu
     protected String thing;
     private final String sam = "sam";
     public List<String> hehe = new ArrayList<>();
-
+    private Cat cat;
+    private Dog dog;
     // didn't account for methods with the same name, but diff params
 
     public TestFIle(String e){                      //start count brace is 2           //diff: 2
@@ -20,7 +22,7 @@ public class TestFIle {                             //start count brace is 1, bu
         }                                           //ending brace is 1                 //diff: 2
     }                                               //ending brace is now 2             //diff: 1 (CAN PARSE FOR ATTRIBUTES)
 
-    public final int getZ() {                       //start count is 4                  //diff: 2
+    public final int getZ(Dog e) {                       //start count is 4                  //diff: 2
         String rando = "ee";
         return z;
     }                                               //ending brace is 3                 //diff: 1 (CAN PARSE FOR ATTRIBUTES)

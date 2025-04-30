@@ -7,42 +7,45 @@ import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class UMLModel {
-    private final Set<String> classNames = new HashSet<>();
-    private final Set<String> interfaceNames = new HashSet<>();
+
+    //remove final from most items bc some item might have dupelicate names
+
+    public final Set<String> classNames = new HashSet<>();
+    public final Set<String> interfaceNames = new HashSet<>();
     // private final Set<String> enumNames = new HashSet<>();
-    private final Set<String> abstractNames = new HashSet<>();
+    public final Set<String> abstractNames = new HashSet<>();
 
     // Visability:
     // Key: Attibute Name / Method Name ; Value: visability
-    private final Map<String, String> attributeVisibility = new HashMap<>();
-    private final Map<String, String> methodVisibility = new HashMap<>();
+    private Map<String, String> attributeVisibility = new HashMap<>();
+    private Map<String, String> methodVisibility = new HashMap<>();
 
     // Names:
     // Key: Class Name ; Value: list of attributes / methods
-    private final Map<String, List<String>> classAttributes = new HashMap<>();
-    private final Map<String, List<String>> classMethods = new HashMap<>();
+    public Map<String, List<String>> classAttributes = new HashMap<>();
+    public Map<String, List<String>> classMethods = new HashMap<>();
 
     // Keep track of method params
     // Key 1: class name, Key 2: method name, Value: params
-    private final Map<String, Map<String, String>> methodParams = new HashMap<>();
+    public Map<String, Map<String, String>> methodParams = new HashMap<>();
 
     // Return Types:
     // Key 1: class name, Key 2: method name, Value: return type
-    private final Map<String, Map<String, String>> attributeReturnTypes = new HashMap<>();
-    private final Map<String, Map<String, String>> methodReturnTypes = new HashMap<>();
+    public Map<String, Map<String, String>> attributeReturnTypes = new HashMap<>();
+    public Map<String, Map<String, String>> methodReturnTypes = new HashMap<>();
 
     // Keep track of initialized attributes:
-    private final Map<String, Map<String, String>> attributeInitialValues = new HashMap<>();
+    private  Map<String, Map<String, String>> attributeInitialValues = new HashMap<>();
 
     // Dependencies
-    // private final DependenciesModel dependenciesModel = new DependenciesModel();
+    private final DependenciesModel dependenciesModel = new DependenciesModel();
 
     // Check for "final" and "static" keyword
     // Key: clasName ; Value: attr/meth ; is__
-    private final Map<String, Map<String, Boolean>> attributeFinal = new HashMap<>();
-    private final Map<String, Map<String, Boolean>> methodFinal = new HashMap<>();
-    private final Map<String, Map<String, Boolean>> attributeStatic = new HashMap<>();
-    private final Map<String, Map<String, Boolean>> methodStatic = new HashMap<>();
+    public Map<String, Map<String, Boolean>> attributeFinal = new HashMap<>();
+    private Map<String, Map<String, Boolean>> methodFinal = new HashMap<>();
+    private Map<String, Map<String, Boolean>> attributeStatic = new HashMap<>();
+    private Map<String, Map<String, Boolean>> methodStatic = new HashMap<>();
 
     /*
      * 
@@ -61,6 +64,34 @@ public class UMLModel {
      * tldr: if it's the same thread it can proceed without blocking
      */
     private final ReentrantLock lock = new ReentrantLock();
+
+
+    public void resetForNextClass() {
+        // Clear temporary state but preserve relationships
+        this.classNames.clear();
+        this.interfaceNames.clear();
+        this.abstractNames.clear();
+        this.resetVisibility();
+        this.resetMethods();
+        this.resetAttributes();
+    }
+
+    public DependenciesModel getDependenciesModel() {
+        return dependenciesModel;
+    }
+
+    public void resetVisibility() {
+        this.attributeVisibility = new HashMap<>();
+        this.methodVisibility = new HashMap<>();
+    }
+
+    public void resetMethods() {
+        this.classMethods = new HashMap<>();
+        this.methodFinal = new HashMap<>();
+        this.methodParams = new HashMap<>();
+        this.methodReturnTypes = new HashMap<>();
+        this.methodStatic = new HashMap<>();
+    }
 
     public void addClass(String className) {
         lock.lock();
@@ -230,11 +261,18 @@ public class UMLModel {
     }
 
     public String getClassName() {
-        return this.classNames.toString().replace("[", "").replace("]", "");
+        String[] arr = this.classNames.toString().split(",");
+        int position = arr.length - 1;
+        return arr[position].replace("[", "").replace("]", "").trim();
     }
 
     public String getInterfaceName() {
-        return this.interfaceNames.toString().replace("[", "").replace("]", "");
+        if (interfaceNames.isEmpty()) {
+            return "";
+        }
+        String[] arr = this.interfaceNames.toString().split(",");
+        int position = arr.length - 1;
+        return arr[position].replace("[", "").replace("]", "").trim();
     }
 
     public String convertVisibilityToSymbol(String visibility) {
@@ -257,26 +295,34 @@ public class UMLModel {
     }
 
     public List<String> getAttributesInfo() {
-        boolean isClass = false;
+        boolean isInterface = false;
         List<String> attributeList = new ArrayList<>();
         String className = getClassName();
-        if (className == "") {
-            className = getInterfaceName();
-        }
+        String interfaceName = getInterfaceName();
+
         List<String> keys;
 
         if (this.classAttributes.containsKey(className)) {
             keys = this.classAttributes.get(className);
+        } else if(this.classAttributes.containsKey(interfaceName)) {
+            keys = this.classAttributes.get(interfaceName);
+            isInterface = true;
+            System.out.println("eee");
         } else {
-            isClass = true;
             return null;
         }
-        
-        if (!isClass) {
+
+        if (!isInterface && interfaceName.isBlank()) {
             for (String key : keys) {
                 String s = "";
                 String visibility = this.attributeVisibility.get(key);
-                String symbol = convertVisibilityToSymbol(visibility);
+                String symbol;
+                if (visibility == null) {
+                    symbol = "~";
+                } else {
+                    symbol = convertVisibilityToSymbol(visibility);
+                }
+
                 String returnType = this.attributeReturnTypes.get(className).get(key);
                 boolean isFinal = false;
                 if (this.attributeFinal.containsKey(className)) {
@@ -304,6 +350,8 @@ public class UMLModel {
                 }
                 attributeList.add(s);
             }
+        } else if (!interfaceName.isBlank()) {
+            System.out.println("this is interface name"+interfaceName);
         }
         return attributeList;
     }
@@ -328,7 +376,12 @@ public class UMLModel {
                 String s = "";
                 String methodName = key;
                 String visibility = this.methodVisibility.get(key);
-                String symbol = convertVisibilityToSymbol(visibility);
+                String symbol;
+                if (visibility == null) {
+                    symbol = "~";
+                } else {
+                    symbol = convertVisibilityToSymbol(visibility);
+                }
                 if (methodName.equals(className)) {
                     s += "<<create>> ";
                 }
@@ -409,29 +462,36 @@ public class UMLModel {
         return methodList;
     }
 
+    public void resetAttributes(){
+        this.attributeFinal = new HashMap<>();
+        this.attributeInitialValues = new HashMap<>();
+        this.attributeReturnTypes = new HashMap<>();
+        this.attributeStatic = new HashMap<>();
+    }
+
     @Override
     public String toString() {
         String s = "UML MODEL: ";
-        // s += "\nClass Name: " + getClassName() + '\n';
+        s += "\nClass Name: " + getClassName() + '\n';
         s += "\nMethods: " + getMethodInfo();
         s += "\nAttribute: " + getAttributesInfo();
-        // s += "\nAttribute Names: " + this.classAttributes;
-        // s += "\nReturn Type: " + this.attributeReturnTypes;
-        // s += "\n initial assignment: " + this.attributeInitialValues;
-        // s += "\nisFinal: "+this.attributeFinal;
-        // s += "\nisStatic: " + this.attributeStatic;
+        s += "\nAttribute Names: " + this.classAttributes;
+        s += "\nReturn Type: " + this.attributeReturnTypes;
+        s += "\n initial assignment: " + this.attributeInitialValues;
+        s += "\nisFinal: " + this.attributeFinal;
+        s += "\nisStatic: " + this.attributeStatic;
 
-        // s += "Attribute Visibility: " + this.attributeVisibility + "\n";
-        // s += "Attributes: " + this.classAttributes.values() + "\n";
-        // s += "Attribute Return types: " + this.attributeReturnTypes.values();
+        s += "Attribute Visibility: " + this.attributeVisibility + "\n";
+        s += "Attributes: " + this.classAttributes.values() + "\n";
+        s += "Attribute Return types: " + this.attributeReturnTypes.values();
 
-        // s+= "\nMethod Name: " + this.classMethods;
-        // s+= "\nMethod Visibility: " + this.methodVisibility;
-        // s+= "\nMethod Return Type: " + this.methodReturnTypes.values();
-        // s+= "\nMethod Params: " + this.methodParams;
+        s += "\nMethod Name: " + this.classMethods;
+        s += "\nMethod Visibility: " + this.methodVisibility;
+        s += "\nMethod Return Type: " + this.methodReturnTypes.values();
+        s += "\nMethod Params: " + this.methodParams;
 
-        // s+= "\nMethod is Static: " + this.methodStatic;
-        // s+= "\nMethod is FInal: " + this.methodFinal;
+        s += "\nMethod is Static: " + this.methodStatic;
+        s += "\nMethod is FInal: " + this.methodFinal;
 
         return s;
     }
