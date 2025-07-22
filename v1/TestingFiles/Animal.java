@@ -1,4 +1,4 @@
-package TestingFiles;
+package v1.TestingFiles;
 
 // Animal interface
 public interface Animal {

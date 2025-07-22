@@ -1,4 +1,4 @@
-package TestingFiles;
+package v1.TestingFiles;
 
 public class Dog implements Animal {
     private String name;

@@ -1,4 +1,4 @@
-package TestingFiles;
+package v1.TestingFiles;
 
 public interface Animal2 {
     void makeSound();
