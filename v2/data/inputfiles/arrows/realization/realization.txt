@@ -1,0 +1,20 @@
+PaymentMethod is an interface representing an abstract way to make a payment.
+
+CreditCardPayment realizes it by implementing the pay() method.
+
+This is polymorphism: you could have many classes (e.g., PaypalPayment, BitcoinPayment) realizing the same interface.
+
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+interface PaymentMethod {
+  +pay(amount: double): void
+}
+
+class CreditCardPayment {
+  - cardNumber: String
+  +pay(amount: double): void
+}
+
+CreditCardPayment ..|> PaymentMethod
+@enduml

@@ -1,0 +1,20 @@
+Aggregation: Represented in UML by a hollow diamond.
+
+In Java: One class has a reference to another class, but does not own its lifecycle.
+
+
+Expected UML Diagram:
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+class Department {
+  - deptName: String
+  - professors: List<Professor>
+}
+
+class Professor {
+  - name: String
+}
+
+Department o-- Professor
+@enduml

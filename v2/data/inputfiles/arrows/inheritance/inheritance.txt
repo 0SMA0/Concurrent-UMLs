@@ -1,0 +1,26 @@
+UML Arrow: Solid line with a hollow triangle pointing to the superclass (--|>).
+
+Meaning: A subclass "is a" type of the superclass.
+
+It inherits methods and fields from the parent class.
+
+Expected UML Diagram:
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class Animal {
+  - name: String
+  +speak(): void
+}
+
+class Dog {
+  +speak(): void
+}
+
+class Cat {
+  +speak(): void
+}
+
+Dog --|> Animal
+Cat --|> Animal
+@enduml

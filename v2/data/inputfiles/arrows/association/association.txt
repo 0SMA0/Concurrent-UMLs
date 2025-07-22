@@ -1,0 +1,22 @@
+Represented in UML with a solid line (----) between two classes.
+
+Means: One class knows about or refers to another class.
+
+No ownership implied (unlike aggregation or composition).
+
+Expected UML Diagram:
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class Student {
+  - name: String
+  - enrolledCourse: Course
+}
+
+class Course {
+  - courseCode: String
+  - courseTitle: String
+}
+
+Student --> Course
+@enduml

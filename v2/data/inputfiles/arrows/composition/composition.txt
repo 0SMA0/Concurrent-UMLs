@@ -1,0 +1,20 @@
+UML arrow: Solid line with a filled diamond (*--) at the "whole" end.
+
+Meaning: A class owns and is responsible for the lifecycle of another class.
+
+When the whole is destroyed, the part is too.
+
+Expected UML Diagram:
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class House {
+  - rooms: List<Room>
+}
+
+class Room {
+  - name: String
+}
+
+House *-- Room
+@enduml

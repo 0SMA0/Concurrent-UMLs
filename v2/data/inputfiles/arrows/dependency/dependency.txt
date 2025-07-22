@@ -1,0 +1,21 @@
+UML Arrow: Dotted line with open arrowhead (--->)
+
+Meaning: One class temporarily uses another class — typically as a parameter, local variable, or method return type.
+
+No ownership or long-term reference.
+
+Expected UML Diagram:
+@startuml
+skinparam classAttributeIconSize 0
+hide circle 
+class Printer {
+  +print(doc: Document): void
+}
+
+class Document {
+  -content: String
+  +getContent(): String
+}
+
+Printer ..> Document
+@enduml
