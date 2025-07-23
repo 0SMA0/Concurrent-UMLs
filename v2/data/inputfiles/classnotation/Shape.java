@@ -29,7 +29,7 @@ package v2.data.inputfiles.classnotation;
  *          parameter name and return type
  */
 
-@SuppressWarnings
+@SuppressWarnings("unused")
 public class Shape {
     private int length;
     public String name;
