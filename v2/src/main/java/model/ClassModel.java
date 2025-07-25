@@ -13,6 +13,9 @@ public class ClassModel {
     // class methods
     private final List<MethodModel> methods = new ArrayList<>();
 
+    private boolean isInterface;
+    private boolean isAbstract;
+
     public ClassModel(String className) {
         this.className = className;
     }
@@ -76,12 +79,18 @@ public class ClassModel {
                 '}';
     }
 
+    public void setIsInterface(boolean set) {
+        this.isInterface = set;
+    }
+
+    public void setIsAbstract(boolean set) {
+        this.isAbstract = set;
+    }
 
     public static void main(String[] args) {
         FieldModel field = new FieldModel(Visibility.PRIVATE, false, false, null, "e", null);
         ClassModel d = new ClassModel("d");
         d.addField(field);
         System.out.println(d.toString());
-
     }
 }

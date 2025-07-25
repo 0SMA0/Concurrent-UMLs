@@ -1,6 +1,5 @@
 package controller;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -19,7 +18,6 @@ public class JavaFileParser {
 
         for (ClassOrInterfaceDeclaration type : cu.findAll(ClassOrInterfaceDeclaration.class)) {
             System.out.println(type.getNameAsString());
-            
             for (FieldDeclaration field : type.getFields()) {
                 System.out.println(" Field: " + field.getElementType() + " " + field.getVariables());
             }
@@ -36,7 +34,7 @@ public class JavaFileParser {
 
     public static void main(String[] args) {
         JavaFileParser parser = new JavaFileParser();
-        Path file = Paths.get("v2\\test\\resources\\data\\inputfiles\\classnotation\\Shape.java");
+        // Path file = Paths.get("v2\\test\\resources\\data\\inputfiles\\classnotation\\Shape.java");
         Path file2 = Paths.get("v2\\test\\resources\\data\\inputfiles\\arrows\\realization\\PaymentMethod.java");
 
         try {
