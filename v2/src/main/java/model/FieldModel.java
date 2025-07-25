@@ -1,4 +1,4 @@
-package v2.src.main.java.model;
+package model;
 
 public class FieldModel {
     // visiblity

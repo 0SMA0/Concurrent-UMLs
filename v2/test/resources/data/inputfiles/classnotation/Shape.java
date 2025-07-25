@@ -1,5 +1,4 @@
-package v2.test.resources.data.inputfiles.classnotation;
-
+package classnotation;
 /*
  * This is used to test:
  *      Class name

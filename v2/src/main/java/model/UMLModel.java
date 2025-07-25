@@ -1,4 +1,4 @@
-package v2.src.main.java.model;
+package model;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -22,5 +22,13 @@ public class UMLModel {
 
     public List<DependencyModel> getRelationships() {
         return List.copyOf(relationships); // defensive copy
+    }
+
+    public void replaceClass(String className, ClassModel newModel) {
+        if (className == null || newModel == null || newModel.getClassName() == null)
+            return;
+
+        classes.removeIf(c -> c.getClassName().equals(className));
+        classes.add(newModel);
     }
 }

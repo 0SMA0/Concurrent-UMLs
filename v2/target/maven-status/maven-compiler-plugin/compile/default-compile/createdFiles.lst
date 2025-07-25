@@ -1,0 +1,8 @@
+model\UMLModel.class
+model\DependencyType.class
+model\MethodModel.class
+model\ClassModel.class
+model\FieldModel.class
+model\Visibility.class
+model\DependencyModel.class
+model\ParameterModel.class
