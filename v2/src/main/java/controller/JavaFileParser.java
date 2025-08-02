@@ -25,7 +25,6 @@ public class JavaFileParser {
             for (MethodDeclaration method : type.getMethods()) {
                 System.out.println(" Method: " + method.getType() + " " + method.getName() + method.getParameters());
             } 
-        
         }
 
 

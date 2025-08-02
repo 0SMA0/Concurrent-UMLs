@@ -79,12 +79,35 @@ public class ClassModel {
                 '}';
     }
 
+    public boolean isInterface() {
+        return isInterface;
+    }
+
+    public boolean isAbstract() {
+        return isAbstract;
+    }
+
     public void setIsInterface(boolean set) {
         this.isInterface = set;
     }
 
     public void setIsAbstract(boolean set) {
         this.isAbstract = set;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null || getClass() != obj.getClass())
+            return false;
+        ClassModel that = (ClassModel) obj;
+        return className.equals(that.className);
+    }
+
+    @Override
+    public int hashCode() {
+        return className.hashCode();
     }
 
     public static void main(String[] args) {

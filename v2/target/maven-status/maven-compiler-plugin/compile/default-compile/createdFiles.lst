@@ -1,8 +1,12 @@
 model\UMLModel.class
 model\DependencyType.class
 model\MethodModel.class
+controller\UMLParserController.class
 model\ClassModel.class
+view\PlantUMLGenerator.class
 model\FieldModel.class
 model\Visibility.class
 model\DependencyModel.class
+controller\JavaFileParser.class
+controller\UMLParserController$FileParserTask.class
 model\ParameterModel.class
