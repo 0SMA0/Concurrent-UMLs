@@ -1,17 +1,17 @@
 package controller;
 
-import java.lang.module.ModuleDescriptor.Exports.Modifier;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -46,7 +46,15 @@ public class JavaFileParser {
             for (FieldDeclaration field : classInterface.getFields()) {
                 FieldModel fieldModel = new FieldModel(null, false, false, null, null, null);
                 // modifers are in a list and at the first ele, but if empty it will not be taken
-                field.getModifiers();
+                NodeList<Modifier> modList = field.getModifiers();
+                System.out.println(modList);
+                Visibility vis = null;
+                if (!modList.isEmpty()) {
+                    vis = geVisibility(modList);
+                }
+                System.out.println(vis);
+                    
+
 
                 // System.out.println(" Field: " + field.getElementType() + " " + field.getVariables());
             }
@@ -55,6 +63,26 @@ public class JavaFileParser {
                 System.out.println(" Method: " + method.getType() + " " + method.getName() + method.getParameters());
             } 
         }
+    }
+
+    public Visibility geVisibility(NodeList<Modifier> modList) {
+        Visibility vis ;
+        switch (modList.get(0).toString().trim()) {
+            case "public":
+                vis = Visibility.PUBLIC;
+                // return vis;
+            case "":
+                vis = Visibility.PACAKAGE_PRIVATE;
+                // return vis;
+
+            case "private":
+                vis = Visibility.PRIVATE;
+                // return vis;
+
+            case "protected":
+                vis = Visibility.PROTECTED;
+            }
+            return vis;
     }
 
     public static void main(String[] args) {
