@@ -23,7 +23,7 @@ public class FieldModel {
         this.isFinal = isFinal;
         this.returnType = returnType;
         this.name = name;
-        if (!(declaredValues == Optional.empty().toString())) {
+        if (declaredValues != null) {
             this.declaredValues = declaredValues;
         }
     }

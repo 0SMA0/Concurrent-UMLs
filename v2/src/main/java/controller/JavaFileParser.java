@@ -38,47 +38,106 @@ public class JavaFileParser {
 
     public void parseFile(Path filePath) throws Exception {
         CompilationUnit cu = parser.parse(filePath).getResult().orElseThrow();
-        // System.out.println(d.getNameAsString());
-        ClassModel current;
+
         for (ClassOrInterfaceDeclaration classInterface : cu.findAll(ClassOrInterfaceDeclaration.class)) {
-            current = new ClassModel(classInterface.getNameAsString());
-
-            Collection<FieldModel> fieldModels = new ArrayList<>();
-
-            for (FieldDeclaration field : classInterface.getFields()) {
-
-                NodeList<Modifier> modList = field.getModifiers();
-                Visibility visibility = getVisibility(modList);
-                String returnType = field.getElementType().toString();
-                boolean isStatic = field.isStatic();
-                boolean isFinal = field.isFinal();
-                String declared = field.getVariable(0).getInitializer().toString();
-                String name = field.getVariable(0).getNameAsString();
-                FieldModel fieldModel = new FieldModel(visibility, isStatic, isFinal, returnType, name, declared);
-                fieldModels.add(fieldModel);
-            }
-            current.addFields(fieldModels);
-            Collection<MethodModel> methodModels = new ArrayList<>();
-            for (MethodDeclaration method : classInterface.getMethods()) {
-                NodeList<Modifier> modList = method.getModifiers();
-                Visibility visibility = getVisibility(modList);
-                boolean isStatic = method.isStatic();
-                boolean isFinal = method.isFinal();
-                String returnType = method.getTypeAsString();
-                String name = method.getNameAsString();
-                MethodModel model = new MethodModel(visibility, isStatic, isFinal, returnType, name);
-                NodeList<com.github.javaparser.ast.body.Parameter> params = method.getParameters();
-                for (com.github.javaparser.ast.body.Parameter parameter : params) {
-                    String paramName = parameter.getNameAsString();
-                    String dataType = parameter.getTypeAsString();
-                    ParameterModel param = new ParameterModel(dataType, paramName);
-                    model.addParameters(param);
-                }
-                methodModels.add(model);
-            }
-            current.addMethods(methodModels);
-            System.out.println(current.toString());
+            ClassModel classModel = parseClass(classInterface);
+            umlModel.addClassToDiagram(classModel);
+            System.out.println(classModel.toString());
         }
+    }
+
+    private ClassModel parseClass(ClassOrInterfaceDeclaration classInterface) {
+        ClassModel classModel = new ClassModel(classInterface.getNameAsString());
+
+        // Set class type flags
+        classModel.setIsInterface(classInterface.isInterface());
+        classModel.setIsAbstract(classInterface.isAbstract());
+
+        // Parse and add fields
+        Collection<FieldModel> fields = parseFields(classInterface);
+        classModel.addFields(fields);
+
+        // Parse and add methods
+        Collection<MethodModel> methods = parseMethods(classInterface);
+        classModel.addMethods(methods);
+
+        return classModel;
+    }
+
+    private Collection<FieldModel> parseFields(ClassOrInterfaceDeclaration classInterface) {
+        Collection<FieldModel> fieldModels = new ArrayList<>();
+
+        for (FieldDeclaration field : classInterface.getFields()) {
+            NodeList<Modifier> modList = field.getModifiers();
+            Visibility visibility = getVisibility(modList);
+            String returnType = field.getElementType().toString();
+            boolean isStatic = field.isStatic();
+            boolean isFinal = field.isFinal();
+
+            // Handle multiple variables in one declaration (e.g., int x, y, z;)
+            field.getVariables().forEach(variable -> {
+                FieldModel fieldModel = createFieldModel(variable, visibility, isStatic, isFinal, returnType);
+                fieldModels.add(fieldModel);
+            });
+        }
+
+        return fieldModels;
+    }
+
+    private FieldModel createFieldModel(com.github.javaparser.ast.body.VariableDeclarator variable,
+            Visibility visibility, boolean isStatic, boolean isFinal, String returnType) {
+        String name = variable.getNameAsString();
+        String declared = variable.getInitializer()
+                .map(Object::toString)
+                .orElse(null);
+
+        return new FieldModel(visibility, isStatic, isFinal, returnType, name, declared);
+    }
+
+    private Collection<MethodModel> parseMethods(ClassOrInterfaceDeclaration classInterface) {
+        Collection<MethodModel> methodModels = new ArrayList<>();
+
+        for (MethodDeclaration method : classInterface.getMethods()) {
+            MethodModel methodModel = parseMethod(method);
+            methodModels.add(methodModel);
+        }
+
+        return methodModels;
+    }
+
+    private MethodModel parseMethod(MethodDeclaration method) {
+        NodeList<Modifier> modList = method.getModifiers();
+        Visibility visibility = getVisibility(modList);
+        boolean isStatic = method.isStatic();
+        boolean isFinal = method.isFinal();
+        String returnType = method.getTypeAsString();
+        String name = method.getNameAsString();
+
+        MethodModel methodModel = new MethodModel(visibility, isStatic, isFinal, returnType, name);
+
+        // Parse and add parameters
+        Collection<ParameterModel> parameters = parseParameters(method);
+        parameters.forEach(methodModel::addParameters);
+
+        return methodModel;
+    }
+
+    private Collection<ParameterModel> parseParameters(MethodDeclaration method) {
+        Collection<ParameterModel> parameters = new ArrayList<>();
+
+        NodeList<com.github.javaparser.ast.body.Parameter> params = method.getParameters();
+        for (com.github.javaparser.ast.body.Parameter parameter : params) {
+            String paramName = parameter.getNameAsString();
+            String dataType = parameter.getTypeAsString();
+            ParameterModel param = new ParameterModel(dataType, paramName);
+            parameters.add(param);
+        }
+
+        return parameters;
+    }
+
+    public UMLModel getUmlModel() {
+        return umlModel;
     }
 
     public Visibility getVisibility(NodeList<Modifier> modList) {
