@@ -49,6 +49,10 @@ public class MethodModel {
         return parameters;
     }
 
+    public void addParameters(ParameterModel param) {
+        this.parameters.add(param);
+    }
+
     @Override
     public String toString() {
         return String.format("MethodModel{name='%s', returnType='%s', visibility=%s, static=%s, final=%s, params=%s}",

@@ -1,5 +1,7 @@
 package model;
 
+import java.util.Optional;
+
 public class FieldModel {
     // visiblity
     private Visibility visibility;
@@ -21,7 +23,9 @@ public class FieldModel {
         this.isFinal = isFinal;
         this.returnType = returnType;
         this.name = name;
-        this.declaredValues = declaredValues;
+        if (!(declaredValues == Optional.empty().toString())) {
+            this.declaredValues = declaredValues;
+        }
     }
 
     public Visibility getVisibility() {
