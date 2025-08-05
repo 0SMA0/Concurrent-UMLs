@@ -28,13 +28,13 @@ public class JavaFileParser {
 
     private final JavaParser parser = new JavaParser();
     private final UMLModel umlModel = new UMLModel();
-    private final ExecutorService executorService;
-    private final ReentrantLock reentrantLock = new ReentrantLock();
+    // private final ExecutorService executorService;
+    // private final ReentrantLock reentrantLock = new ReentrantLock();
 
-    public JavaFileParser() {
-        this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        System.out.println(this.executorService);
-    }
+    // public JavaFileParser() {
+    //     this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    //     System.out.println(this.executorService);
+    // }
 
     public void parseFile(Path filePath) throws Exception {
         CompilationUnit cu = parser.parse(filePath).getResult().orElseThrow();

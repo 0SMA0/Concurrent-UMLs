@@ -1,6 +1,5 @@
 package model;
 
-import java.util.Optional;
 
 public class FieldModel {
     // visiblity
