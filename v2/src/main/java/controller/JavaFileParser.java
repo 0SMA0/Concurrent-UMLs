@@ -4,9 +4,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.Collections;
+import java.util.List;
+// Later use 
+// import java.util.concurrent.ExecutorService;
+// import java.util.concurrent.Executors;
+// import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.javaparser.JavaParser;
 
@@ -28,6 +31,8 @@ public class JavaFileParser {
 
     private final JavaParser parser = new JavaParser();
     private final UMLModel umlModel = new UMLModel();
+    private final List<ClassOrInterfaceDeclaration> classDeclarations = new ArrayList<>();
+
     // private final ExecutorService executorService;
     // private final ReentrantLock reentrantLock = new ReentrantLock();
 
@@ -40,10 +45,15 @@ public class JavaFileParser {
         CompilationUnit cu = parser.parse(filePath).getResult().orElseThrow();
 
         for (ClassOrInterfaceDeclaration classInterface : cu.findAll(ClassOrInterfaceDeclaration.class)) {
+            classDeclarations.add(classInterface);
             ClassModel classModel = parseClass(classInterface);
             umlModel.addClassToDiagram(classModel);
             System.out.println(classModel.toString());
         }
+    }
+
+    public List<ClassOrInterfaceDeclaration> getAllClassDeclarations() {
+        return Collections.unmodifiableList(classDeclarations);
     }
 
     private ClassModel parseClass(ClassOrInterfaceDeclaration classInterface) {

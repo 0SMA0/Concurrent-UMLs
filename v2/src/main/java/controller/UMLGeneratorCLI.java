@@ -1,0 +1,210 @@
+package controller;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import model.UMLModel;
+import view.PlantUMLGenerator;
+
+public class UMLGeneratorCLI {
+    
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            printUsage();
+            System.exit(1);
+        }
+        
+        try {
+            UMLGeneratorConfig config = parseArguments(args);
+            UMLGeneratorCLI cli = new UMLGeneratorCLI();
+            cli.generateUML(config);
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+    
+    public void generateUML(UMLGeneratorConfig config) throws Exception {
+        System.out.println("🚀 Starting UML Generation...");
+        System.out.println("Input: " + config.inputPath);
+        System.out.println("Output: " + config.outputPath);
+        System.out.println("Include relationships: " + config.includeRelationships);
+        System.out.println();
+        
+        // Find all Java files
+        List<Path> javaFiles = findJavaFiles(config.inputPath);
+        System.out.println("📁 Found " + javaFiles.size() + " Java files");
+        
+        // Phase 1: Parse all files
+        System.out.println("📝 Phase 1: Parsing Java files...");
+        JavaFileParser parser = new JavaFileParser();
+        
+        for (Path file : javaFiles) {
+            System.out.println("  Parsing: " + file.getFileName());
+            parser.parseFile(file);
+        }
+        
+        UMLModel umlModel = parser.getUmlModel();
+        System.out.println("✅ Parsed " + umlModel.getClasses().size() + " classes");
+        
+        // Phase 2: Analyze relationships (if enabled)
+        if (config.includeRelationships) {
+            System.out.println("🔗 Phase 2: Analyzing relationships...");
+            RelationshipAnalyzer analyzer = new RelationshipAnalyzer(umlModel);
+            analyzer.analyzeAllRelationships(parser.getAllClassDeclarations());
+            System.out.println("✅ Found " + umlModel.getRelationships().size() + " relationships");
+            
+            if (config.verbose) {
+                analyzer.printRelationshipSummary();
+            }
+        }
+        
+        // Phase 3: Generate PlantUML
+        System.out.println("🎨 Phase 3: Generating PlantUML...");
+        PlantUMLGenerator generator = new PlantUMLGenerator();
+        String plantUML = generator.generatePlantUML(umlModel);
+        
+        // Phase 4: Save output
+        System.out.println("💾 Phase 4: Saving output...");
+        Files.writeString(config.outputPath, plantUML);
+        
+        System.out.println("🎉 UML generation complete!");
+        System.out.println("📄 Output saved to: " + config.outputPath);
+        System.out.println("🌐 Open at: http://www.plantuml.com/plantuml/uml");
+        
+        // Print preview if requested
+        if (config.showPreview) {
+            System.out.println("\n=== PlantUML Preview ===");
+            System.out.println(plantUML);
+            System.out.println("========================");
+        }
+    }
+    
+    private List<Path> findJavaFiles(Path inputPath) throws IOException {
+        List<Path> javaFiles = new ArrayList<>();
+        
+        // Check if path exists first
+        if (!Files.exists(inputPath)) {
+            throw new IllegalArgumentException("Path does not exist: " + inputPath);
+        }
+        
+        if (Files.isRegularFile(inputPath) && inputPath.toString().endsWith(".java")) {
+            javaFiles.add(inputPath);
+        } else if (Files.isDirectory(inputPath)) {
+            try (Stream<Path> paths = Files.walk(inputPath)) {
+                paths.filter(path -> path.toString().endsWith(".java"))
+                     .filter(Files::isRegularFile)
+                     .forEach(javaFiles::add);
+            }
+        } else {
+            throw new IllegalArgumentException("Input path must be a .java file or directory: " + inputPath);
+        }
+        
+        return javaFiles;
+    }
+    
+    private static UMLGeneratorConfig parseArguments(String[] args) {
+        UMLGeneratorConfig config = new UMLGeneratorConfig();
+        
+        for (int i = 0; i < args.length; i++) {
+            switch (args[i]) {
+                case "-i", "--input":
+                    if (i + 1 < args.length) {
+                        // Normalize path separators for cross-platform compatibility
+                        String pathStr = args[++i].replace('\\', '/');
+                        config.inputPath = Paths.get(pathStr);
+                    } else {
+                        throw new IllegalArgumentException("Missing input path");
+                    }
+                    break;
+                    
+                case "-o", "--output":
+                    if (i + 1 < args.length) {
+                        config.outputPath = Paths.get(args[++i]);
+                    } else {
+                        throw new IllegalArgumentException("Missing output path");
+                    }
+                    break;
+                    
+                case "--no-relationships":
+                    config.includeRelationships = false;
+                    break;
+                    
+                case "-v", "--verbose":
+                    config.verbose = true;
+                    break;
+                    
+                case "-p", "--preview":
+                    config.showPreview = true;
+                    break;
+                    
+                case "-h", "--help":
+                    printUsage();
+                    System.exit(0);
+                    break;
+                    
+                default:
+                    if (config.inputPath == null) {
+                        // Normalize path separators for cross-platform compatibility
+                        String pathStr = args[i].replace('\\', '/');
+                        config.inputPath = Paths.get(pathStr);
+                    } else {
+                        throw new IllegalArgumentException("Unknown argument: " + args[i]);
+                    }
+            }
+        }
+        
+        // Set defaults
+        if (config.inputPath == null) {
+            throw new IllegalArgumentException("Input path is required");
+        }
+        
+        if (config.outputPath == null) {
+            String inputName = config.inputPath.getFileName().toString();
+            if (inputName.endsWith(".java")) {
+                inputName = inputName.substring(0, inputName.length() - 5);
+            }
+            config.outputPath = Paths.get(inputName + ".puml");
+        }
+        
+        return config;
+    }
+    
+    private static void printUsage() {
+        System.out.println("UML Generator - Convert Java code to PlantUML diagrams");
+        System.out.println();
+        System.out.println("Usage:");
+        System.out.println("  java -jar uml-generator.jar <input> [options]");
+        System.out.println("  java -jar uml-generator.jar -i <input> -o <output> [options]");
+        System.out.println();
+        System.out.println("Arguments:");
+        System.out.println("  <input>                   Java file or directory to analyze");
+        System.out.println();
+        System.out.println("Options:");
+        System.out.println("  -i, --input <path>        Input Java file or directory");
+        System.out.println("  -o, --output <path>       Output PlantUML file (default: <input>.puml)");
+        System.out.println("  --no-relationships       Skip relationship analysis");
+        System.out.println("  -v, --verbose             Verbose output with relationship details");
+        System.out.println("  -p, --preview             Show PlantUML preview in console");
+        System.out.println("  -h, --help                Show this help message");
+        System.out.println();
+        System.out.println("Examples:");
+        System.out.println("  java -jar uml-generator.jar src/main/java");
+        System.out.println("  java -jar uml-generator.jar -i MyClass.java -o diagram.puml");
+        System.out.println("  java -jar uml-generator.jar src/ --no-relationships -v");
+    }
+    
+    private static class UMLGeneratorConfig {
+        Path inputPath;
+        Path outputPath;
+        boolean includeRelationships = true;
+        boolean verbose = false;
+        boolean showPreview = false;
+    }
+}

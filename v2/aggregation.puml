@@ -1,0 +1,20 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class Department {
+  -deptName: String
+  -professors: List<Professor>
+  --
+  +getDeptName(): String
+  +getProfessors(): List<Professor>
+}
+
+class Professor {
+  -name: String
+  --
+  +getName(): String
+}
+
+Department o-- Professor
+@enduml

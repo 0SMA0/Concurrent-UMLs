@@ -1,0 +1,185 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class JavaFileParser {
+  -parser: JavaParser = new JavaParser()
+  -umlModel: UMLModel = new UMLModel()
+  -classDeclarations: List<ClassOrInterfaceDeclaration> = new ArrayList<>()
+  --
+  +parseFile(filePath: Path): void
+  +getAllClassDeclarations(): List<ClassOrInterfaceDeclaration>
+  -parseClass(classInterface: ClassOrInterfaceDeclaration): ClassModel
+  -parseFields(classInterface: ClassOrInterfaceDeclaration): Collection<FieldModel>
+  -createFieldModel(variable: com.github.javaparser.ast.body.VariableDeclarator, visibility: Visibility, isStatic: boolean, isFinal: boolean, returnType: String): FieldModel
+  -parseMethods(classInterface: ClassOrInterfaceDeclaration): Collection<MethodModel>
+  -parseMethod(method: MethodDeclaration): MethodModel
+  -parseParameters(method: MethodDeclaration): Collection<ParameterModel>
+  +getUmlModel(): UMLModel
+  +getVisibility(modList: NodeList<Modifier>): Visibility
+  +{static} main(args: String[]): void
+}
+
+class RelationshipAnalyzer {
+  -umlModel: UMLModel
+  -availableClasses: Set<String>
+  -classModelMap: Map<String, ClassModel>
+  -astNodeMap: Map<String, ClassOrInterfaceDeclaration>
+  --
+  +analyzeAllRelationships(classDeclarations: List<ClassOrInterfaceDeclaration>): void
+  -buildASTNodeMap(classDeclarations: List<ClassOrInterfaceDeclaration>): void
+  -analyzeClassRelationships(classDecl: ClassOrInterfaceDeclaration, fromClass: ClassModel): void
+  -analyzeInheritanceRelationships(classDecl: ClassOrInterfaceDeclaration, fromClass: ClassModel): void
+  -analyzeFieldRelationships(classDecl: ClassOrInterfaceDeclaration, fromClass: ClassModel): void
+  -analyzeFieldVariable(field: FieldDeclaration, variable: VariableDeclarator, fromClass: ClassModel): void
+  -analyzeGenericTypes(fieldType: Type, fromClass: ClassModel, fieldName: String): void
+  -analyzeArrayTypes(fieldType: Type, fromClass: ClassModel): void
+  -determineFieldRelationshipType(field: FieldDeclaration, fieldName: String, targetClassName: String): DependencyType
+  -isCollectionType(type: Type): boolean
+  -analyzeMethodRelationships(classDecl: ClassOrInterfaceDeclaration, fromClass: ClassModel): void
+  -addFieldRelationship(fromClass: ClassModel, toClassName: String, relationshipType: DependencyType): void
+  -addMethodRelationship(fromClass: ClassModel, toClassName: String, context: String): void
+  -hasStrongerRelationship(fromClass: ClassModel, toClassName: String): boolean
+  -relationshipExists(fromClass: ClassModel, toClass: ClassModel, type: DependencyType): boolean
+  -extractClassName(type: Type): String
+  +printRelationshipSummary(): void
+}
+
+class RelationshipAnalyzerTest {
+  +{static} main(args: String[]): void
+  -{static} testRelationshipAnalysis(): void
+}
+
+class UMLGeneratorCLI {
+  +{static} main(args: String[]): void
+  +generateUML(config: UMLGeneratorConfig): void
+  -findJavaFiles(inputPath: Path): List<Path>
+  -{static} parseArguments(args: String[]): UMLGeneratorConfig
+  -{static} printUsage(): void
+}
+
+class UMLGeneratorConfig {
+  ~inputPath: Path
+  ~outputPath: Path
+  ~includeRelationships: boolean = true
+  ~verbose: boolean = false
+  ~showPreview: boolean = false
+}
+
+class ClassModel {
+  -className: String
+  -fields: List<FieldModel> = new ArrayList<>()
+  -methods: List<MethodModel> = new ArrayList<>()
+  -isInterface: boolean
+  -isAbstract: boolean
+  --
+  +addField(field: FieldModel): boolean
+  +addMethod(method: MethodModel): boolean
+  +addFields(fieldsList: Collection<FieldModel>): boolean
+  +addMethods(methodsList: Collection<MethodModel>): boolean
+  +getClassName(): String
+  +getFields(): List<FieldModel>
+  +getMethods(): List<MethodModel>
+  +toString(): String
+  +isInterface(): boolean
+  +isAbstract(): boolean
+  +setIsInterface(set: boolean): void
+  +setIsAbstract(set: boolean): void
+  +equals(obj: Object): boolean
+  +hashCode(): int
+  +{static} main(args: String[]): void
+}
+
+class DependencyModel {
+  -fromClass: ClassModel
+  -toClass: ClassModel
+  -type: DependencyType
+  --
+  +getFromClass(): ClassModel
+  +getToClass(): ClassModel
+  +getType(): DependencyType
+  +setType(new_Type: DependencyType): void
+  +equals(obj: Object): boolean
+  +hashCode(): int
+  +toString(): String
+}
+
+class FieldModel {
+  -visibility: Visibility
+  -isStatic: boolean
+  -isFinal: boolean
+  -returnType: String
+  -name: String
+  -declaredValues: String
+  --
+  +getVisibility(): Visibility
+  +isStatic(): boolean
+  +isFinal(): boolean
+  +getReturnType(): String
+  +getName(): String
+  +getDeclaredValues(): String
+  +toString(): String
+}
+
+class MethodModel {
+  -visibility: Visibility
+  -isStatic: boolean
+  -isFinal: boolean
+  -returnType: String
+  -name: String
+  -parameters: List<ParameterModel> = new ArrayList<>()
+  --
+  +getVisibility(): Visibility
+  +isStatic(): boolean
+  +isFinal(): boolean
+  +getReturnType(): String
+  +getName(): String
+  +getParameters(): List<ParameterModel>
+  +addParameters(param: ParameterModel): void
+  +toString(): String
+}
+
+class ParameterModel {
+  -dataType: String
+  -name: String
+  --
+  +getDataType(): String
+  +getName(): String
+  +toString(): String
+}
+
+class UMLModel {
+  -classes: List<ClassModel> = new CopyOnWriteArrayList<>()
+  -relationships: List<DependencyModel> = new CopyOnWriteArrayList<>()
+  --
+  +addClassToDiagram(cModel: ClassModel): boolean
+  +addRelationshipToDiagram(dModel: DependencyModel): boolean
+  +getClasses(): List<ClassModel>
+  +getRelationships(): List<DependencyModel>
+  +replaceClass(className: String, newModel: ClassModel): void
+}
+
+class PlantUMLGenerator {
+  +generatePlantUML(umlModel: UMLModel): String
+  -generateClass(plantUML: StringBuilder, classModel: ClassModel): void
+  -generateRelationship(plantUML: StringBuilder, relationship: DependencyModel): void
+  +{static} main(args: String[]): void
+}
+
+JavaFileParser *-- UMLModel
+JavaFileParser ..> ClassModel
+JavaFileParser ..> FieldModel
+JavaFileParser ..> MethodModel
+RelationshipAnalyzer *-- UMLModel
+RelationshipAnalyzer o-- ClassModel
+UMLGeneratorCLI ..> UMLGeneratorConfig
+ClassModel o-- FieldModel
+ClassModel o-- MethodModel
+DependencyModel *-- ClassModel
+MethodModel o-- ParameterModel
+UMLModel o-- ClassModel
+UMLModel o-- DependencyModel
+PlantUMLGenerator ..> UMLModel
+PlantUMLGenerator ..> ClassModel
+PlantUMLGenerator ..> DependencyModel
+@enduml

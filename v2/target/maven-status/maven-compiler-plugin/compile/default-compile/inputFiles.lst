@@ -1,11 +1,13 @@
+C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\controller\RelationshipAnalyzer.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\UMLModel.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\Visibility.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\DependencyType.java
-C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\MethodModel.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\ParameterModel.java
-C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\DependencyModel.java
-C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\controller\UMLParserController.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\FieldModel.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\ClassModel.java
+C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\controller\RelationshipAnalyzerTest.java
+C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\MethodModel.java
+C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\model\DependencyModel.java
+C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\controller\UMLGeneratorCLI.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\view\PlantUMLGenerator.java
 C:\Users\Sam\Concurrent-UMLs\v2\src\main\java\controller\JavaFileParser.java

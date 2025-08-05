@@ -1,0 +1,23 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class Shape {
+  -length: int
+  +name: String
+  #symbol: char
+  ~color: String
+  -{static} random1: int
+  -{static} random2: int = 3
+  --
+  +getLength(): int
+  +getName(): String
+  +getSymbol(): char
+  +getColor(): String
+  -setLength(length: int): void
+  ~setName(name: String): void
+  #setSymbol(symbol: char): void
+  +{static} setColor(color: String): void
+}
+
+@enduml
