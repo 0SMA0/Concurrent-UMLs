@@ -153,7 +153,7 @@ public class JavaFileParser {
     public Visibility getVisibility(NodeList<Modifier> modList) {
         // Handle empty modifier list - default to package private
         if (modList.isEmpty()) {
-            return Visibility.PACAKAGE_PRIVATE;
+            return Visibility.PACKAGE_PRIVATE;
         }
 
         // Look through all modifiers to find visibility modifier
@@ -170,7 +170,7 @@ public class JavaFileParser {
         }
 
         // If no visibility modifier found, default to package private
-        return Visibility.PACAKAGE_PRIVATE;
+        return Visibility.PACKAGE_PRIVATE;
     }
 
     public static void main(String[] args) {

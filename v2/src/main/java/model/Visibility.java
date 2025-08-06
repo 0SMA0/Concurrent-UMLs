@@ -4,7 +4,7 @@ public enum Visibility {
     PUBLIC("+"),
     PRIVATE("-"),
     PROTECTED("#"),
-    PACAKAGE_PRIVATE("~");
+    PACKAGE_PRIVATE("~");
 
     private final String visibility;
 

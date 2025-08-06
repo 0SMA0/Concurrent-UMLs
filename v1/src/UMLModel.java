@@ -288,7 +288,7 @@ public class UMLModel {
                 symbol = Visibility.PROTECTED.getVisibility();
                 break;
             case "package-private":
-                symbol = Visibility.PACAKAGE_PRIVATE.getVisibility();
+                symbol = Visibility.PACKAGE_PRIVATE.getVisibility();
                 break;
         }
         return symbol;
