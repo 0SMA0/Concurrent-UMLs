@@ -1,0 +1,158 @@
+{
+  "name": "uml-generator",
+  "displayName": "UML Generator",
+  "description": "Generate UML diagrams from Java source code",
+  "version": "0.0.1",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Visualization",
+    "Other"
+  ],
+  "keywords": [
+    "uml",
+    "java",
+    "plantuml",
+    "diagram",
+    "class diagram"
+  ],
+  "activationEvents": [],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "umlGenerator.generateFromFile",
+        "title": "Generate UML from File",
+        "category": "UML Generator",
+        "icon": "$(symbol-class)"
+      },
+      {
+        "command": "umlGenerator.generateFromFolder",
+        "title": "Generate UML from Folder",
+        "category": "UML Generator",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "umlGenerator.openSettings",
+        "title": "Open UML Generator Settings",
+        "category": "UML Generator"
+      },
+      {
+        "command": "umlGenerator.generateProjectUML",
+        "title": "Generate UML for Entire Project",
+        "category": "UML Generator",
+        "icon": "$(project)"
+      },
+      {
+        "command": "umlGenerator.openWebView",
+        "title": "Open View",
+        "category": "UML Generator"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .java",
+          "command": "umlGenerator.generateFromFile",
+          "group": "uml@1"
+        },
+        {
+          "when": "explorerResourceIsFolder",
+          "command": "umlGenerator.generateFromFolder",
+          "group": "uml@2"
+        },
+        {
+          "command": "umlGenerator.openWebView",
+          "when": "resourceExtname == .puml",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "resourceExtname == .java",
+          "command": "umlGenerator.generateFromFile",
+          "group": "uml"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "umlGenerator.generateFromFile",
+          "when": "resourceExtname == .java"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "umlGenerator.generateFromFile",
+        "key": "ctrl+shift+u",
+        "mac": "cmd+shift+u",
+        "when": "resourceExtname == .java"
+      }
+    ],
+    "configuration": {
+      "title": "UML Generator",
+      "properties": {
+        "umlGenerator.includeRelationships": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include relationship analysis in UML diagrams",
+          "scope": "window"
+        },
+        "umlGenerator.outputPath": {
+          "type": "string",
+          "default": "./uml-output",
+          "description": "Default output directory for generated UML files"
+        },
+        "umlGenerator.jarPath": {
+          "type": "string",
+          "description": "Custom path to UML Generator JAR file (leave empty to use bundled)",
+          "scope": "machine"
+        },
+        "umlGenerator.verbose": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable verbose output during UML generation"
+        },
+        "umlGenerator.autoOpenFile": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically open generated UML file"
+        },
+        "umlGenerator.showPreview": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show PlantUML preview in console output"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^16.18.126",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "ts-loader": "^9.4.1",
+    "typescript": "^4.9.4",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.0"
+  },
+  "files": [
+    "dist",
+    "resources"
+  ]
+}
