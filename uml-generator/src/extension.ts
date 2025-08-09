@@ -18,7 +18,7 @@ async function openPlantUMLPreview(uri: vscode.Uri, context: vscode.ExtensionCon
     try {
         const content = FileSystem.readFileSync(uri.fsPath, 'utf-8');
         const metadata = extractUMLMetadata(content);
-        
+
         if (metadata) {
             // Create a webview panel to display the UML
             const panel = vscode.window.createWebviewPanel(
@@ -32,10 +32,10 @@ async function openPlantUMLPreview(uri: vscode.Uri, context: vscode.ExtensionCon
             );
 
             panel.webview.html = getWebviewContent(metadata);
-            
+
             // Handle messages from the webview
             panel.webview.onDidReceiveMessage(
-                message => {
+                async message => {
                     switch (message.command) {
                         case 'openUrl':
                             vscode.env.openExternal(vscode.Uri.parse(message.url));
@@ -48,6 +48,8 @@ async function openPlantUMLPreview(uri: vscode.Uri, context: vscode.ExtensionCon
                             vscode.env.clipboard.writeText(message.encoded);
                             vscode.window.showInformationMessage('Encoded string copied to clipboard!');
                             return;
+                        case 'download':
+                           
                     }
                 },
                 undefined,
@@ -66,7 +68,7 @@ function extractUMLMetadata(content: string): UMLMetadata | null {
     let encoded = '';
     let url = '';
     let generatedOn = '';
-    
+
     // Extract metadata from comments
     for (const line of lines) {
         if (line.startsWith("' Encoded: ")) {
@@ -77,7 +79,7 @@ function extractUMLMetadata(content: string): UMLMetadata | null {
             generatedOn = line.replace("' Generated on: ", '').trim();
         }
     }
-    
+
     if (encoded && url) {
         return {
             encoded,
@@ -86,7 +88,7 @@ function extractUMLMetadata(content: string): UMLMetadata | null {
             content: content.replace(/^'.*/gm, '').trim() // Remove comment lines for clean content
         };
     }
-    
+
     return null;
 }
 
@@ -178,9 +180,9 @@ function getWebviewContent(metadata: UMLMetadata): string {
         
         <div class="metadata">
             <h3>Actions</h3>
-            <button class="button" onclick="openUrl()">🌐 Open in Browser</button>
+            <button class="button" onclick="download()">Download</button>
+            <button class="button secondary" onclick="openUrl()">🌐 Open in Browser</button>
             <button class="button secondary" onclick="copyUrl()">📋 Copy URL</button>
-            <button class="button secondary" onclick="copyEncoded()">🔐 Copy Encoded</button>
         </div>
         
         <div class="image-container">
@@ -206,7 +208,12 @@ function getWebviewContent(metadata: UMLMetadata): string {
 
         <script>
             const vscode = acquireVsCodeApi();
-            
+            function download() {
+                vscode.postMessage({
+                    command: 'download',
+                    url: '${metadata.url.replace('/uml/', '/png/')}'
+                });
+            }
             function openUrl() {
                 vscode.postMessage({
                     command: 'openUrl',
@@ -251,7 +258,7 @@ function registerCommands(context: vscode.ExtensionContext) {
         }
     });
 
-    const generateFromFolderCommand = vscode.commands.registerCommand('umlGenerator.generateFromFolder', async(uri: vscode.Uri) => {
+    const generateFromFolderCommand = vscode.commands.registerCommand('umlGenerator.generateFromFolder', async (uri: vscode.Uri) => {
         try {
             await generateUMLFromFolder(uri);
         } catch (error) {
@@ -327,7 +334,7 @@ async function generateUMLFromPath(inputPath: string, isFolder: boolean, options
                     if (!jarPath) {
                         throw new Error('UML Generator Jar not found');
                     }
-                    
+
                     let outputDir: string;
                     let outputFile: string;
                     let inputName: string;
@@ -351,14 +358,14 @@ async function generateUMLFromPath(inputPath: string, isFolder: boolean, options
                         } else {
                             outputDir = path.dirname(inputPath); // Original behavior
                         }
-                        inputName = path.basename(inputPath, '.java'); 
+                        inputName = path.basename(inputPath, '.java');
                         outputFile = path.join(outputDir, `${inputName}.puml`);
                     }
-                    
-                    if(!FileSystem.existsSync(outputDir)) {
-                        FileSystem.mkdirSync(outputDir, {recursive: true});
+
+                    if (!FileSystem.existsSync(outputDir)) {
+                        FileSystem.mkdirSync(outputDir, { recursive: true });
                     }
-                    
+
                     const args = ['-jar', jarPath, '-i', inputPath, '-o', outputFile];
                     if (!options.includeRelationships) {
                         args.push('--no-relationship');
@@ -371,7 +378,7 @@ async function generateUMLFromPath(inputPath: string, isFolder: boolean, options
                     console.log(`Running command: java ${args.join(' ')}`);
                     console.log(`Expected output file: ${outputFile}`);
 
-                    progress.report({increment: 25, message:"Running UML generator..."});
+                    progress.report({ increment: 25, message: "Running UML generator..." });
 
                     const javaProcess = spawn('java', args, {
                         cwd: path.dirname(jarPath)
@@ -396,8 +403,8 @@ async function generateUMLFromPath(inputPath: string, isFolder: boolean, options
 
                     javaProcess.on('close', async (code) => {
                         try {
-                            progress.report({increment: 75, message: "Processing results..."});
-                            
+                            progress.report({ increment: 75, message: "Processing results..." });
+
                             console.log(`Java process exited with code: ${code}`);
                             console.log(`stdout: ${output}`);
                             console.log(`stderr: ${errorOutput}`);
@@ -441,18 +448,18 @@ async function generateUMLFromPath(inputPath: string, isFolder: boolean, options
                                     vscode.commands.executeCommand('revealFileInOS', vscode.Uri.file(outputFile));
                                 }
                             });
-                            
+
                             if (options.autoOpenFile) {
                                 await vscode.commands.executeCommand('vscode.open', vscode.Uri.file(outputFile));
                             }
-                            
-                            progress.report({increment: 100, message: "Done!"});
-                            resolve();                            
+
+                            progress.report({ increment: 100, message: "Done!" });
+                            resolve();
                         } catch (error) {
                             reject(error);
                         }
                     });
-                    
+
                     javaProcess.on('error', (error) => {
                         reject(new Error(`Failed to start java process: ${error.message}`));
                     });
@@ -468,12 +475,12 @@ async function generateUMLFromPath(inputPath: string, isFolder: boolean, options
 async function getJarPath(): Promise<string | null> {
     const config = vscode.workspace.getConfiguration('umlGenerator');
     const customJarPath = config.get<string>('jarPath');
-    
+
     // Fixed: Check custom JAR path first
     if (customJarPath && FileSystem.existsSync(customJarPath)) {
         return customJarPath;
     }
-    
+
     // Check bundled JAR
     const extensionPath = vscode.extensions.getExtension('your-publisher-name.uml-generator')?.extensionPath;
     if (extensionPath) {
@@ -482,7 +489,7 @@ async function getJarPath(): Promise<string | null> {
             return bundledJarPath;
         }
     }
-    
+
     // Check common paths
     const commonPaths = [
         './uml-generator.jar',
