@@ -1,9 +1,18 @@
 {
   "name": "uml-generator",
-  "displayName": "UML Generator",
-  "description": "Generate UML diagrams from Java source code",
-  "version": "0.0.1",
+  "displayName": "UML Generator for Java",
+  "description": "Generate PlantUML diagrams from Java source code with relationship analysis",
+  "version": "0.1.0",
   "publisher": "your-publisher-name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/uml-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/uml-generator/issues"
+  },
+  "homepage": "https://github.com/your-username/uml-generator#readme",
   "engines": {
     "vscode": "^1.74.0"
   },
@@ -16,28 +25,36 @@
     "java",
     "plantuml",
     "diagram",
-    "class diagram"
+    "class diagram",
+    "visualization",
+    "code analysis"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onLanguage:java",
+    "onCommand:umlGenerator.generateFromFile",
+    "onCommand:umlGenerator.generateFromFolder"
+  ],
   "main": "./dist/extension.js",
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "contributes": {
     "commands": [
       {
         "command": "umlGenerator.generateFromFile",
         "title": "Generate UML from File",
         "category": "UML Generator",
-        "icon": "$(symbol-class)"
+        "icon": "$(symbol-class)",
+        "enablement": "resourceExtname == .java"
       },
       {
         "command": "umlGenerator.generateFromFolder",
         "title": "Generate UML from Folder",
         "category": "UML Generator",
-        "icon": "$(folder)"
-      },
-      {
-        "command": "umlGenerator.openSettings",
-        "title": "Open UML Generator Settings",
-        "category": "UML Generator"
+        "icon": "$(folder)",
+        "enablement": "explorerResourceIsFolder"
       },
       {
         "command": "umlGenerator.generateProjectUML",
@@ -46,9 +63,17 @@
         "icon": "$(project)"
       },
       {
+        "command": "umlGenerator.openSettings",
+        "title": "Open UML Generator Settings",
+        "category": "UML Generator",
+        "icon": "$(settings-gear)"
+      },
+      {
         "command": "umlGenerator.openWebView",
-        "title": "Open View",
-        "category": "UML Generator"
+        "title": "Open PlantUML Preview",
+        "category": "UML Generator",
+        "icon": "$(preview)",
+        "enablement": "resourceExtname == .puml"
       }
     ],
     "menus": {
@@ -64,22 +89,41 @@
           "group": "uml@2"
         },
         {
-          "command": "umlGenerator.openWebView",
           "when": "resourceExtname == .puml",
-          "group": "navigation"
+          "command": "umlGenerator.openWebView",
+          "group": "navigation@1"
         }
       ],
       "editor/context": [
         {
           "when": "resourceExtname == .java",
           "command": "umlGenerator.generateFromFile",
-          "group": "uml"
+          "group": "uml@1"
+        }
+      ],
+      "editor/title": [
+        {
+          "when": "resourceExtname == .puml",
+          "command": "umlGenerator.openWebView",
+          "group": "navigation@1"
         }
       ],
       "commandPalette": [
         {
           "command": "umlGenerator.generateFromFile",
           "when": "resourceExtname == .java"
+        },
+        {
+          "command": "umlGenerator.generateFromFolder",
+          "when": "explorerResourceIsFolder || workspaceFolderCount > 0"
+        },
+        {
+          "command": "umlGenerator.generateProjectUML",
+          "when": "workspaceFolderCount > 0"
+        },
+        {
+          "command": "umlGenerator.openWebView",
+          "when": "resourceExtname == .puml"
         }
       ]
     },
@@ -89,6 +133,12 @@
         "key": "ctrl+shift+u",
         "mac": "cmd+shift+u",
         "when": "resourceExtname == .java"
+      },
+      {
+        "command": "umlGenerator.openWebView",
+        "key": "ctrl+shift+p",
+        "mac": "cmd+shift+p",
+        "when": "resourceExtname == .puml"
       }
     ],
     "configuration": {
@@ -97,36 +147,60 @@
         "umlGenerator.includeRelationships": {
           "type": "boolean",
           "default": true,
-          "description": "Include relationship analysis in UML diagrams",
+          "description": "Include relationship analysis in UML diagrams (inheritance, composition, aggregation, etc.)",
           "scope": "window"
         },
-        "umlGenerator.outputPath": {
-          "type": "string",
-          "default": "./uml-output",
-          "description": "Default output directory for generated UML files"
-        },
+
         "umlGenerator.jarPath": {
           "type": "string",
-          "description": "Custom path to UML Generator JAR file (leave empty to use bundled)",
+          "description": "Custom path to UML Generator JAR file (leave empty to use bundled JAR)",
           "scope": "machine"
         },
         "umlGenerator.verbose": {
           "type": "boolean",
           "default": false,
-          "description": "Enable verbose output during UML generation"
+          "description": "Enable verbose output during UML generation for debugging",
+          "scope": "window"
         },
         "umlGenerator.autoOpenFile": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically open generated UML file"
+          "description": "Automatically open generated UML file after creation",
+          "scope": "window"
         },
         "umlGenerator.showPreview": {
           "type": "boolean",
           "default": false,
-          "description": "Show PlantUML preview in console output"
+          "description": "Show PlantUML preview in console output",
+          "scope": "window"
+        },
+        "umlGenerator.javaExecutable": {
+          "type": "string",
+          "default": "java",
+          "description": "Path to Java executable (default: 'java' from PATH)",
+          "scope": "machine"
+        },
+        "umlGenerator.maxFileSize": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum file size in MB to process (prevents processing very large files)",
+          "scope": "window"
+        },
+         "umlGenerator.outputDirectory": {
+            "type": "string",
+            "default": "",
+            "description": "Custom output directory for UML files (relative to workspace root). Leave empty to output next to source files."
         }
       }
-    }
+    },
+    "languages": [
+      {
+        "id": "plantuml",
+        "aliases": ["PlantUML", "plantuml"],
+        "extensions": [".puml", ".plantuml", ".pu"],
+        "configuration": "./language-configuration.json"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -137,7 +211,9 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "deploy": "vsce publish",
+    "package-extension": "vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -145,14 +221,32 @@
     "@types/vscode": "^1.74.0",
     "@typescript-eslint/eslint-plugin": "^5.45.0",
     "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/test-electron": "^2.3.0",
     "eslint": "^8.28.0",
+    "mocha": "^10.2.0",
     "ts-loader": "^9.4.1",
     "typescript": "^4.9.4",
     "webpack": "^5.75.0",
-    "webpack-cli": "^5.0.0"
+    "webpack-cli": "^5.0.0",
+    "@vscode/vsce": "^2.22.0"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
   },
   "files": [
     "dist",
-    "resources"
+    "resources",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "extensionDependencies": [],
+  "extensionPack": [],
+  "badges": [
+    {
+      "url": "https://img.shields.io/visual-studio-marketplace/v/your-publisher-name.uml-generator",
+      "href": "https://marketplace.visualstudio.com/items?itemName=your-publisher-name.uml-generator",
+      "description": "Visual Studio Marketplace Version"
+    }
   ]
 }
