@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import model.UMLModel;
+import view.PlantUMLEncoder;
 import view.PlantUMLGenerator;
 
 public class UMLGeneratorCLI {

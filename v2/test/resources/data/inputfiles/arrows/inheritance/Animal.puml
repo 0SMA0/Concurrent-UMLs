@@ -1,0 +1,11 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class Animal {
+  #name: String
+  --
+  +speak(): void
+}
+
+@enduml

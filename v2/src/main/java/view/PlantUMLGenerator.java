@@ -65,7 +65,7 @@ public class PlantUMLGenerator {
             plantUML.append("  --\n");
         }
 
-        // Methods
+        // Methods (including constructors)
         for (MethodModel method : classModel.getMethods()) {
             plantUML.append("  ");
             plantUML.append(method.getVisibility().getVisibility());
@@ -74,6 +74,9 @@ public class PlantUMLGenerator {
                 plantUML.append("{static} ");
             }
 
+            // NEW: Check if this is a constructor (no return type or return type is empty)
+            boolean isConstructor = method.getReturnType() == null || method.getReturnType().isEmpty();
+            
             plantUML.append(method.getName()).append("(");
 
             // Parameters
@@ -88,9 +91,14 @@ public class PlantUMLGenerator {
                 }
             }
 
-            plantUML.append("): ")
-                    .append(method.getReturnType())
-                    .append("\n");
+            plantUML.append(")");
+            
+            // NEW: Only add return type for methods, not constructors
+            if (!isConstructor) {
+                plantUML.append(": ").append(method.getReturnType());
+            }
+            
+            plantUML.append("\n");
         }
 
         plantUML.append("}\n");
@@ -114,25 +122,37 @@ public class PlantUMLGenerator {
         animal.addField(new FieldModel(Visibility.PROTECTED, false, false, "String", "name", null));
         animal.addMethod(new MethodModel(Visibility.PUBLIC, false, false, "void", "speak"));
 
-        // Create Dog class
+        // Create Dog class with constructor
         ClassModel dog = new ClassModel("Dog");
+        
+        // Add constructor (empty return type indicates constructor)
+        MethodModel dogConstructor = new MethodModel(Visibility.PUBLIC, false, false, "", "Dog");
+        dogConstructor.addParameters(new ParameterModel("String", "name"));
+        dog.addMethod(dogConstructor);
+        
         MethodModel dogSpeak = new MethodModel(Visibility.PUBLIC, false, false, "void", "speak");
         dog.addMethod(dogSpeak);
 
-        // Create Cat class
-        ClassModel cat = new ClassModel("Cat");
-        MethodModel catSpeak = new MethodModel(Visibility.PUBLIC, false, false, "void", "speak");
-        cat.addMethod(catSpeak);
-
-        // Create Student class with more variety
+        // Create Student class with multiple constructors
         ClassModel student = new ClassModel("Student");
         student.addField(new FieldModel(Visibility.PRIVATE, false, false, "String", "name", null));
         student.addField(new FieldModel(Visibility.PRIVATE, false, false, "int", "age", null));
         student.addField(new FieldModel(Visibility.PRIVATE, true, true, "int", "MAX_AGE", "120"));
 
+        // Add default constructor
+        MethodModel defaultConstructor = new MethodModel(Visibility.PUBLIC, false, false, "", "Student");
+        student.addMethod(defaultConstructor);
+        
+        // Add parameterized constructor
+        MethodModel paramConstructor = new MethodModel(Visibility.PUBLIC, false, false, "", "Student");
+        paramConstructor.addParameters(new ParameterModel("String", "name"));
+        paramConstructor.addParameters(new ParameterModel("int", "age"));
+        student.addMethod(paramConstructor);
+
+        // Add regular methods
         MethodModel getName = new MethodModel(Visibility.PUBLIC, false, false, "String", "getName");
         MethodModel setName = new MethodModel(Visibility.PUBLIC, false, false, "void", "setName");
-        setName.getParameters().add(new ParameterModel("String", "name"));
+        setName.addParameters(new ParameterModel("String", "name"));
 
         MethodModel staticMethod = new MethodModel(Visibility.PUBLIC, true, false, "int", "getMaxAge");
 
@@ -143,12 +163,10 @@ public class PlantUMLGenerator {
         // Add classes to model
         umlModel.addClassToDiagram(animal);
         umlModel.addClassToDiagram(dog);
-        umlModel.addClassToDiagram(cat);
         umlModel.addClassToDiagram(student);
 
         // Add relationships
         umlModel.addRelationshipToDiagram(new DependencyModel(dog, animal, DependencyType.INHERITANCE));
-        umlModel.addRelationshipToDiagram(new DependencyModel(cat, animal, DependencyType.INHERITANCE));
 
         // Generate and print PlantUML
         PlantUMLGenerator generator = new PlantUMLGenerator();

@@ -1,0 +1,99 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class Department {
+  -deptName: String
+  -professors: List<Professor>
+  --
+  +Department(deptName: String, professors: List<Professor>)
+  +getDeptName(): String
+  +getProfessors(): List<Professor>
+}
+
+class Professor {
+  -name: String
+  --
+  +Professor(name: String)
+  +getName(): String
+}
+
+class Course {
+  -courseCode: String
+  -courseTitle: String
+  --
+  +Course(courseCode: String, courseTitle: String)
+  +getCourseCode(): String
+  +getCourseTitle(): String
+}
+
+class Student {
+  -name: String
+  -enrolledCourse: Course
+  --
+  +Student(name: String, enrolledCourse: Course)
+  +getName(): String
+  +getEnrolledCourse(): Course
+}
+
+class House {
+  -rooms: List<Room>
+  --
+  +House()
+  +getRooms(): List<Room>
+}
+
+class Room {
+  -name: String
+  --
+  +Room(name: String)
+  +getName(): String
+}
+
+class Document {
+  -content: String
+  --
+  +Document(content: String)
+  +getContent(): String
+}
+
+class Printer {
+  +print(doc: Document): void
+}
+
+class Animal {
+  #name: String
+  --
+  +Animal(name: String)
+  +speak(): void
+}
+
+class Cat {
+  +Cat(name: String)
+  +speak(): void
+}
+
+class Dog {
+  +Dog(name: String)
+  +speak(): void
+}
+
+class CreditCardPayment {
+  -cardNumber: String
+  --
+  +CreditCardPayment(cardNumber: String)
+  +pay(amount: double): void
+}
+
+interface PaymentMethod {
+  ~pay(amount: double): void
+}
+
+Department o-- Professor
+Student *-- Course
+House o-- Room
+Printer ..> Document
+Cat --|> Animal
+Dog --|> Animal
+CreditCardPayment ..|> PaymentMethod
+@enduml

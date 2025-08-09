@@ -1,0 +1,12 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class Document {
+  -content: String
+  --
+  +Document(content: String)
+  +getContent(): String
+}
+
+@enduml

@@ -6,17 +6,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-// Later use 
-// import java.util.concurrent.ExecutorService;
-// import java.util.concurrent.Executors;
-// import java.util.concurrent.locks.ReentrantLock;
 
 import com.github.javaparser.JavaParser;
-
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
@@ -32,14 +28,6 @@ public class JavaFileParser {
     private final JavaParser parser = new JavaParser();
     private final UMLModel umlModel = new UMLModel();
     private final List<ClassOrInterfaceDeclaration> classDeclarations = new ArrayList<>();
-
-    // private final ExecutorService executorService;
-    // private final ReentrantLock reentrantLock = new ReentrantLock();
-
-    // public JavaFileParser() {
-    //     this.executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-    //     System.out.println(this.executorService);
-    // }
 
     public void parseFile(Path filePath) throws Exception {
         CompilationUnit cu = parser.parse(filePath).getResult().orElseThrow();
@@ -58,7 +46,10 @@ public class JavaFileParser {
 
     private ClassModel parseClass(ClassOrInterfaceDeclaration classInterface) {
         ClassModel classModel = new ClassModel(classInterface.getNameAsString());
-
+        // Parse and add constructors as special methods
+        Collection<MethodModel> constructors = parseConstructors(classInterface);
+        classModel.addMethods(constructors);
+        
         // Set class type flags
         classModel.setIsInterface(classInterface.isInterface());
         classModel.setIsAbstract(classInterface.isAbstract());
@@ -67,9 +58,10 @@ public class JavaFileParser {
         Collection<FieldModel> fields = parseFields(classInterface);
         classModel.addFields(fields);
 
-        // Parse and add methods
+        // Parse and add methods (including constructors)
         Collection<MethodModel> methods = parseMethods(classInterface);
         classModel.addMethods(methods);
+
 
         return classModel;
     }
@@ -113,6 +105,57 @@ public class JavaFileParser {
         }
 
         return methodModels;
+    }
+
+    /**
+     * NEW: Parse constructors and treat them as special methods
+     */
+    private Collection<MethodModel> parseConstructors(ClassOrInterfaceDeclaration classInterface) {
+        Collection<MethodModel> constructorModels = new ArrayList<>();
+
+        for (ConstructorDeclaration constructor : classInterface.getConstructors()) {
+            MethodModel constructorModel = parseConstructor(constructor);
+            constructorModels.add(constructorModel);
+        }
+
+        return constructorModels;
+    }
+
+    /**
+     * NEW: Parse a constructor declaration into a MethodModel
+     */
+    private MethodModel parseConstructor(ConstructorDeclaration constructor) {
+        NodeList<Modifier> modList = constructor.getModifiers();
+        Visibility visibility = getVisibility(modList);
+        boolean isStatic = false; // Constructors are never static
+        boolean isFinal = false;  // Constructors are never final
+        String returnType = ""; // Constructors don't have return types in UML
+        String name = constructor.getNameAsString(); // Constructor name is the class name
+
+        MethodModel constructorModel = new MethodModel(visibility, isStatic, isFinal, returnType, name);
+
+        // Parse and add parameters
+        Collection<ParameterModel> parameters = parseConstructorParameters(constructor);
+        parameters.forEach(constructorModel::addParameters);
+
+        return constructorModel;
+    }
+
+    /**
+     * NEW: Parse constructor parameters
+     */
+    private Collection<ParameterModel> parseConstructorParameters(ConstructorDeclaration constructor) {
+        Collection<ParameterModel> parameters = new ArrayList<>();
+
+        NodeList<com.github.javaparser.ast.body.Parameter> params = constructor.getParameters();
+        for (com.github.javaparser.ast.body.Parameter parameter : params) {
+            String paramName = parameter.getNameAsString();
+            String dataType = parameter.getTypeAsString();
+            ParameterModel param = new ParameterModel(dataType, paramName);
+            parameters.add(param);
+        }
+
+        return parameters;
     }
 
     private MethodModel parseMethod(MethodDeclaration method) {
@@ -176,8 +219,6 @@ public class JavaFileParser {
     public static void main(String[] args) {
         JavaFileParser parser = new JavaFileParser();
         Path file2 = Paths.get("v2\\test\\resources\\data\\inputfiles\\classnotation\\Shape.java");
-        // Path file2 =
-        // Paths.get("v2\\test\\resources\\data\\inputfiles\\arrows\\realization\\PaymentMethod.java");
         System.out.println("");
         System.out.println("");
         try {
@@ -186,5 +227,4 @@ public class JavaFileParser {
             e.printStackTrace();
         }
     }
-
 }

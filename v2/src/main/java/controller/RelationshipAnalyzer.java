@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -80,6 +81,9 @@ public class RelationshipAnalyzer {
         
         // 3. Method-based relationships (dependency)
         analyzeMethodRelationships(classDecl, fromClass);
+        
+        // 4. NEW: Constructor-based relationships (dependency)
+        analyzeConstructorRelationships(classDecl, fromClass);
     }
     
     /**
@@ -233,11 +237,6 @@ public class RelationshipAnalyzer {
      */
     private void analyzeMethodRelationships(ClassOrInterfaceDeclaration classDecl, ClassModel fromClass) {
         for (MethodDeclaration method : classDecl.getMethods()) {
-            // Skip constructors (they're not methods in UML context)
-            if (method.isConstructorDeclaration()) {
-                continue;
-            }
-            
             // Analyze method parameters
             for (Parameter param : method.getParameters()) {
                 String paramClassName = extractClassName(param.getType());
@@ -254,6 +253,23 @@ public class RelationshipAnalyzer {
                 !hasStrongerRelationship(fromClass, returnClassName)) {
                 
                 addMethodRelationship(fromClass, returnClassName, "return type of " + method.getNameAsString());
+            }
+        }
+    }
+    
+    /**
+     * NEW: Analyzes constructor-based relationships (dependencies)
+     */
+    private void analyzeConstructorRelationships(ClassOrInterfaceDeclaration classDecl, ClassModel fromClass) {
+        for (ConstructorDeclaration constructor : classDecl.getConstructors()) {
+            // Analyze constructor parameters
+            for (Parameter param : constructor.getParameters()) {
+                String paramClassName = extractClassName(param.getType());
+                if (availableClasses.contains(paramClassName) && 
+                    !hasStrongerRelationship(fromClass, paramClassName)) {
+                    
+                    addMethodRelationship(fromClass, paramClassName, "constructor parameter");
+                }
             }
         }
     }

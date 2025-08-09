@@ -1,0 +1,17 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide circle
+
+class CreditCardPayment {
+  -cardNumber: String
+  --
+  +CreditCardPayment(cardNumber: String)
+  +pay(amount: double): void
+}
+
+interface PaymentMethod {
+  ~pay(amount: double): void
+}
+
+CreditCardPayment ..|> PaymentMethod
+@enduml

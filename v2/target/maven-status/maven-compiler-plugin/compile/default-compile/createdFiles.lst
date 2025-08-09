@@ -11,4 +11,3 @@ controller\RelationshipAnalyzerTest.class
 model\ClassModel.class
 view\PlantUMLGenerator.class
 model\FieldModel.class
-controller\JavaFileParser.class
