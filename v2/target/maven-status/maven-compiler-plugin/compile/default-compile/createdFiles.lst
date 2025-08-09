@@ -1,12 +1,12 @@
 model\UMLModel.class
 model\DependencyType.class
 model\MethodModel.class
-controller\RelationshipAnalyzer.class
 controller\UMLGeneratorCLI.class
 controller\UMLGeneratorCLI$UMLGeneratorConfig.class
 model\Visibility.class
 model\DependencyModel.class
 model\ParameterModel.class
+view\PlantUMLEncoder.class
 controller\RelationshipAnalyzerTest.class
 model\ClassModel.class
 view\PlantUMLGenerator.class

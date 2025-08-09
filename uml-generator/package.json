@@ -3,14 +3,14 @@
   "displayName": "UML Generator for Java",
   "description": "Generate PlantUML diagrams from Java source code with relationship analysis",
   "version": "0.1.0",
-  "publisher": "your-publisher-name",
+  "publisher": "Sam Ruan",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/uml-generator.git"
+    "url": "https://github.com/0SMA0/Concurrent-UMLs"
   },
   "bugs": {
-    "url": "https://github.com/your-username/uml-generator/issues"
+    "url": "https://github.com/0SMA0/Concurrent-UMLs/issues"
   },
   "homepage": "https://github.com/your-username/uml-generator#readme",
   "engines": {
