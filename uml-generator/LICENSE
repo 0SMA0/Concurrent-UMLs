@@ -1,0 +1,6 @@
+This project includes third-party software:
+
+- JavaParser (Apache 2.0 License)
+- PlantUML (MIT License)
+
+See the /licenses directory for their full license texts.

@@ -2,6 +2,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import * as FileSystem from 'fs';
 import { spawn } from 'child_process';
+import * as https from 'https';
 
 export function activate(context: vscode.ExtensionContext) {
     registerCommands(context);
@@ -48,8 +49,6 @@ async function openPlantUMLPreview(uri: vscode.Uri, context: vscode.ExtensionCon
                             vscode.env.clipboard.writeText(message.encoded);
                             vscode.window.showInformationMessage('Encoded string copied to clipboard!');
                             return;
-                        case 'download':
-                           
                     }
                 },
                 undefined,
@@ -180,7 +179,6 @@ function getWebviewContent(metadata: UMLMetadata): string {
         
         <div class="metadata">
             <h3>Actions</h3>
-            <button class="button" onclick="download()">Download</button>
             <button class="button secondary" onclick="openUrl()">🌐 Open in Browser</button>
             <button class="button secondary" onclick="copyUrl()">📋 Copy URL</button>
         </div>
@@ -194,7 +192,7 @@ function getWebviewContent(metadata: UMLMetadata): string {
         </div>
         
         <div class="metadata">
-            <h3>PlantUML URL</h3>
+            <h3>Image Link</h3>
             <div class="code-block">${metadata.url}</div>
             
             <h3>Encoded String</h3>
@@ -208,12 +206,6 @@ function getWebviewContent(metadata: UMLMetadata): string {
 
         <script>
             const vscode = acquireVsCodeApi();
-            function download() {
-                vscode.postMessage({
-                    command: 'download',
-                    url: '${metadata.url.replace('/uml/', '/png/')}'
-                });
-            }
             function openUrl() {
                 vscode.postMessage({
                     command: 'openUrl',
@@ -482,7 +474,7 @@ async function getJarPath(): Promise<string | null> {
     }
 
     // Check bundled JAR
-    const extensionPath = vscode.extensions.getExtension('your-publisher-name.uml-generator')?.extensionPath;
+    const extensionPath = vscode.extensions.getExtension('0SMA0.uml-generator')?.extensionPath;
     if (extensionPath) {
         const bundledJarPath = path.join(extensionPath, 'resources', 'uml-generator.jar');
         if (FileSystem.existsSync(bundledJarPath)) {
@@ -492,7 +484,7 @@ async function getJarPath(): Promise<string | null> {
 
     // Check common paths
     const commonPaths = [
-        './uml-generator.jar',
+        './resources/uml-generator.jar',
         '../v2/target/uml-generator.jar',
         './v2/target/uml-generator.jar'
     ];
@@ -523,8 +515,24 @@ async function getJarPath(): Promise<string | null> {
             }
         });
         if (jarUri && jarUri[0]) {
-            await config.update('jarPath', jarUri[0].fsPath, vscode.ConfigurationTarget.Global);
-            return jarUri[0].fsPath;
+            try {
+                await config.update('jarPath', jarUri[0].fsPath, vscode.ConfigurationTarget.Global);
+
+                // Verify it was saved
+                const updatedConfig = vscode.workspace.getConfiguration('umlGenerator');
+                const savedPath = updatedConfig.get<string>('jarPath');
+
+                if (savedPath === jarUri[0].fsPath) {
+                    vscode.window.showInformationMessage(`JAR path saved successfully: ${savedPath}`);
+                    console.log(jarUri[0].fsPath);
+                    return jarUri[0].fsPath;
+                } else {
+                    throw new Error('Path not saved correctly');
+                }
+            } catch (error) {
+                vscode.window.showErrorMessage(`Failed to save JAR path: ${error}`);
+                console.error('Config save error:', error);
+            }
         }
     }
     return null;

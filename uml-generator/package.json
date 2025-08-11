@@ -2,8 +2,8 @@
   "name": "uml-generator",
   "displayName": "UML Generator for Java",
   "description": "Generate PlantUML diagrams from Java source code with relationship analysis",
-  "version": "0.1.0",
-  "publisher": "Sam Ruan",
+  "version": "0.0.1",
+  "publisher": "0SMA0",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -30,9 +30,7 @@
     "code analysis"
   ],
   "activationEvents": [
-    "onLanguage:java",
-    "onCommand:umlGenerator.generateFromFile",
-    "onCommand:umlGenerator.generateFromFolder"
+    "onLanguage:java"
   ],
   "main": "./dist/extension.js",
   "icon": "resources/icon.png",
@@ -55,12 +53,6 @@
         "category": "UML Generator",
         "icon": "$(folder)",
         "enablement": "explorerResourceIsFolder"
-      },
-      {
-        "command": "umlGenerator.generateProjectUML",
-        "title": "Generate UML for Entire Project",
-        "category": "UML Generator",
-        "icon": "$(project)"
       },
       {
         "command": "umlGenerator.openSettings",
@@ -118,10 +110,6 @@
           "when": "explorerResourceIsFolder || workspaceFolderCount > 0"
         },
         {
-          "command": "umlGenerator.generateProjectUML",
-          "when": "workspaceFolderCount > 0"
-        },
-        {
           "command": "umlGenerator.openWebView",
           "when": "resourceExtname == .puml"
         }
@@ -154,7 +142,7 @@
         "umlGenerator.jarPath": {
           "type": "string",
           "description": "Custom path to UML Generator JAR file (leave empty to use bundled JAR)",
-          "scope": "machine"
+          "scope": "resource"
         },
         "umlGenerator.verbose": {
           "type": "boolean",
@@ -188,7 +176,7 @@
         },
          "umlGenerator.outputDirectory": {
             "type": "string",
-            "default": "",
+            "default": "./output",
             "description": "Custom output directory for UML files (relative to workspace root). Leave empty to output next to source files."
         }
       }
@@ -233,13 +221,6 @@
   "dependencies": {
     "child_process": "^1.0.2"
   },
-  "files": [
-    "dist",
-    "resources",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
-  ],
   "extensionDependencies": [],
   "extensionPack": [],
   "badges": [
