@@ -40,6 +40,8 @@ In software development, planning and implementation rarely align perfectly. Dia
 ### Open in PlantUML Preview
 After generation, open the `.puml` file in any PlantUML-compatible previewer to view the diagram.
 
+![demo](uml-generator\resources\ex.gif)
+
 ## Future Features
 - Downloading the diagrams
 - Add stereotypes such as `ConcreteVisitor`, `Visitor`, `Element`, `Invoker`, `Action`, etc.

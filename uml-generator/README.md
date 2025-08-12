@@ -40,6 +40,8 @@ In software development, planning and implementation rarely align perfectly. Dia
 ### Open in PlantUML Preview
 After generation, open the `.puml` file in any PlantUML-compatible previewer to view the diagram.
 
+![demo](resources\ex.gif)
+
 ## Future Features
 - Downloading the diagrams
 - Add stereotypes such as `ConcreteVisitor`, `Visitor`, `Element`, `Invoker`, `Action`, etc.
@@ -51,3 +53,4 @@ After generation, open the `.puml` file in any PlantUML-compatible previewer to 
 ## Acknowledgments
 This project uses [JavaParser](https://javaparser.org/) licensed under the Apache 2.0 License and [PlantUML](https://plantuml.com/) licensed under the MIT License.  
 We gratefully acknowledge these open-source projects for their valuable tools.
+
